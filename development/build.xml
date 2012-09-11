@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="YoBro" default="jars">
+	
+	
+    <description>
+Build YoBro: Manifestation of the Crimson Demon.  This results in a jar file
+YoBro.jar that is executable.
+    </description>
+    	
+    
+    <!-- A simple target to print a banner at the start of the build. -->
+    <target name="start">
+    	<tstamp>
+    		<format property="YEAR" pattern="yyyy"/>
+    	</tstamp>
+   		<echo level="info">
+Yo Bro: Manifestation of the Crimson Demon
+Copyright (c) ${YEAR} by Stephen Lindberg (Neonair Games).
+All rights reserved.
+		</echo>
+   	</target>
+	
+	<!-- Target to make the environment variables available via properties. -->
+	<target name="getenv">
+		<property environment="env"/>
+	</target>
+	
+	<!-- Execute checks prior to building. -->
+	<target name="checks" depends="check-java"/>
+	
+	<!-- Check for Java. -->
+	<target name="check-java" depends="getenv" unless="env.JAVA_HOME">
+		<echo level="error">Please set the environment variable JAVA_HOME to point to the
+root of your Java installation.  This is the folder containing the
+bin, lib, and other folders.</echo>
+		<fail message="JAVA_HOME undefined."/>
+	</target>
+
+	
+	<!-- Perform all necessary initialization, set properties, create the
+		 classpath, etc. -->
+	<target name="init" depends="start,checks">
+		<property name="build.base" 	value="."/>
+		<property name="build.src"  	value="${build.base}/src"/>
+		<property name="build.doc"  	value="${build.base}/doc"/>
+		<property name="build.bin"  	value="${build.base}/bin"/>
+		<property name="build.resources" value="${build.base}/resources"/>
+		<property name="build.jar"		value="YoBro.jar"/>
+		<property name="build.latest"	value="${build.base}/latest"/>
+		<echo level="info">Using Java at ${env.JAVA_HOME}.</echo>
+		<path id="build.classpath">
+			<pathelement path="${java.class.path}"/>
+			<pathelement path="${build.bin}"/>
+		</path>
+		<property name="build.classpath" refid="build.classpath"/>
+		<echo level="info">  Build ....... ${DSTAMP}${TSTAMP}</echo>
+		<echo level="verbose">Using CLASSPATH=${build.classpath}.</echo>
+		<echo level="info">Starting build of Yo Bro: Manifestation of the Crimson Demon on ${TODAY} at ${TSTAMP}.</echo>
+    </target>
+	
+	
+	<!-- A simple target to build both the jars and the documentation. -->
+	<target name="all" depends="jars"
+		description="Build the jars and the API documentation."/>
+	
+	
+	<!-- Clean up the build area.  This will force the source to be re-compiled
+		 but does not affect either the jars or the documentation. -->
+	<target name="clean" depends="init"
+		description="Delete compiled class files.">
+		<delete dir="${build.bin}" failonerror="false"/>
+	</target>
+	
+
+	
+	<!-- Compile all the Java code that is out of date. -->
+	<target name="compile" depends="init"
+		description="Compile all JAva code.">
+		<mkdir dir="${build.bin}"/>
+		<javac
+			destdir		="${build.bin}"
+			classpathref="build.classpath">
+			<src path="${build.src}"/>
+		</javac>
+    </target>
+
+
+
+	<!-- Determine if the jar files are up to date.  If they are, set the
+		 jar.uptodate property.  This checks the latest jar file against
+		 the class files and supporting jar files in lib. -->
+	<target name="jar-check" depends="compile">
+		<uptodate property="jar.uptodate"
+			targetfile="${build.latest}/${build.jar}">
+			<srcfiles dir="${build.bin}" includes="**/*.class"/>
+			<srcfiles dir="${build.resources}" includes="**/*.*"/>
+		</uptodate>
+	</target>
+
+
+	<!-- Build the jar files if they are out of date.  This builds a
+		 comprehensive jar file that contains all supporting jars from
+		 the lib folder.  It also packages up the current source. -->
+	<target name="jars" depends="jar-check" unless="jar.uptodate"
+		description="Build the jar files.">
+		<echo level="info">The ${build.jar} is out of date; rebuilding.</echo>
+		<mkdir dir="${build.latest}"/>
+		<jar
+			filesetmanifest	="mergewithoutmain"
+			destfile		="${build.latest}/${build.jar}"
+			index			="true">
+			<fileset dir="${build.bin}"/>
+			<fileset dir="${build.resources}"/>
+			<manifest>
+				<attribute name="Build-Date" value="${DSTAMP}"/>
+				<attribute name="Main-Class" value="YoBroMain"/>
+			</manifest>
+		</jar>
+		<echo level="info">New ${build.jar} built in ${build.latest}.</echo>
+	</target>
+</project>
