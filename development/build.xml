@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="YoBro" default="jars">
+<project name="Pwnee" default="jars">
 	
 	
     <description>
-Build YoBro: Manifestation of the Crimson Demon.  This results in a jar file
-YoBro.jar that is executable.
+Build The Pwnee 2D Java game engine.  This results in the jar file pwnee.jar.
     </description>
     	
     
@@ -15,7 +14,7 @@ YoBro.jar that is executable.
     		<format property="YEAR" pattern="yyyy"/>
     	</tstamp>
    		<echo level="info">
-Yo Bro: Manifestation of the Crimson Demon
+Pwnee 2D Java game engine
 Copyright (c) ${YEAR} by Stephen Lindberg (Neonair Games).
 All rights reserved.
 		</echo>
@@ -61,7 +60,7 @@ bin, lib, and other folders.</echo>
 	
 	
 	<!-- A simple target to build both the jars and the documentation. -->
-	<target name="all" depends="jars"
+	<target name="all" depends="jars,docs"
 		description="Build the jars and the API documentation."/>
 	
 	
@@ -85,6 +84,32 @@ bin, lib, and other folders.</echo>
 		</javac>
     </target>
 
+   <!-- Determine if the documentation is up to date.  If it is, set the
+		 doc.uptodate property.  This checks the package.html file in the
+		 root folder of the documentation against the time stamps of the
+		 source files. -->
+	<target name="doc-check" depends="init">
+		<uptodate property="doc.uptodate"
+			targetfile="${build.doc}/api/package.html">
+			<srcfiles dir="${build.src}" includes="**/*.java"/>
+		</uptodate>
+	</target>
+   
+   <!-- Build the Java API documentation if it is out of date. -->
+	<target name="docs" depends="doc-check" unless="doc.uptodate"
+		description="Generate the Javadoc.">
+		<echo level="info">The API documentation is out of date; rebuilding.</echo>
+		<mkdir dir="${build.doc}"/>
+		<mkdir dir="${build.doc}/api"/>
+		<javadoc
+			sourcepath		="${build.src}"
+			destdir		="${build.doc}/api"
+			classpathref	="build.classpath"
+			Doctitle	="${configuration.name} API Version ${configuration.version.major}.${configuration.version.minor} Build ${DSTAMP}${TSTAMP}">
+			<include name="**/*.java"/>
+		</javadoc>
+		<echo level="info">API documentation is available in ${build.doc}/api.</echo>
+	</target>
 
 
 	<!-- Determine if the jar files are up to date.  If they are, set the

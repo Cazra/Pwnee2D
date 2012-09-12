@@ -35,10 +35,51 @@ I'll eventually get around to expanding this README and creating some example ap
 Hang in there until then!
 
 All components and examples of Pwnee unless otherwise specified, have been developed and tested
-on a 64-bit computer running Windows 7.
+on a 64-bit computer running Windows 7, but it should also be able to run on any computer 
+with at least Java 6 properly installed.
+
+
 
 Requirements:
 ----------------
 You'll need the following tools to be able to compile and run Pwnee and its examples:
 * At least Java 6 JDK and JRE
 * Adobe Ant
+
+
+
+Building pwnee.jar from the source code:
+-------------------
+Open a command terminal in the "development" directory and enter the command
+"ant all"
+
+This will create the pwnee.jar in the "latest" directory and it will also create the API docs
+for Pwnee in the "docs" directory.
+
+
+
+Building the examples from source:
+---------------------
+In the root directory for the each example, just open a terminal and enter
+"ant all"
+
+The executable jar file for the example will be created in its "latest" directory.
+
+
+
+Frequently Asked Questions:
+----------------
+
+Q: Why is this game engine called "Pwnee"? 
+A: I already named my Javascript + Canvas game engine "Jage", so I couldn't also name 
+my Java game engine "Jage". And also, because pwnees are awesome.
+
+Q: Is "Pwnee" an acronym for something?
+A: Not really, but I guess it could mean something like 
+Programming With Nice Electric Equines.
+
+
+
+
+
+

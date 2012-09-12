@@ -1,50 +1,43 @@
-package gameEngine;
+package pwnee;
 
 import java.util.Random;
 import java.awt.geom.Point2D;
 
-public class GameMath
-{
-	public static double[] sinTable = new double[360];
-	public static double[] cosTable = new double[360];
+/** A class with several static methods for performing various common mathematical computations. */
+public class GameMath {
+   /** A conventience Random object. */
 	public static Random rand = new Random();
 	
-	public static void setUpTrigTables()
-	{
-		for(int i = 0; i < 360; i++)
-		{
-			sinTable[i] = Math.sin(d2r(i));
-			cosTable[i] = Math.cos(d2r(i));
-		}
+   /** Converts an angle from degrees to radians. */
+	public static double d2r(double degrees) {
+		return degrees*Math.PI/180.0;
 	}
+   
+   /** Converts an angle from radians to degrees. */
+   public static double r2d(double radians) {
+      return radians*180.0/Math.PI
+   }
 	
-	
-	public static double d2r(double degrees)
-	{
-		return degrees/360.0*2*Math.PI;
-	}
-	
-	public static double sin(double degrees)
-	{
+   /** Computes the sine of an angle given in degrees. */
+	public static double sin(double degrees) {
 		int angle = (int)degrees % 360;
 		if(angle < 0)
 			angle += 360;
-		return sinTable[angle];
-		//return Math.sin(d2r(degrees));
+		return Math.sin(d2r(degrees));
 	}
 	
+   /** Computes the cosine of an angle given in degrees. */
 	public static double cos(double degrees)
 	{
 		int angle = (int)degrees % 360;
 		if(angle < 0)
 			angle += 360;
-		return cosTable[angle];
-		//return Math.cos(d2r(degrees));
+		return Math.cos(d2r(degrees));
 	}
 	
-	public static double radToDeg = 360.0/(2.0*Math.PI);
 	
-	public static double getAngleTo(double origX, double origY, double destX, double destY)
+	/** Returns the angle in degrees from one point to another, going clockwise from the positive X axis. */
+	public static double angleTo(double origX, double origY, double destX, double destY)
 	{
 		double dx = destX - origX;
 		if(dx == 0)
@@ -53,16 +46,16 @@ public class GameMath
 		
 		if(dx > 0)
 		{
-			return Math.atan(dy/dx)*radToDeg;
+			return r2d(Math.atan(dy/dx));
 		}
 		else
 		{
-			return 180 + Math.atan(dy/dx)*radToDeg;
+			return 180 + r2d(Math.atan(dy/dx));
 		}
 	}
 	
-	
-	public static double getSqrDist(double origX, double origY, double destX, double destY)
+	/** Returns the square distance from one point to another. This is faster for doing things such as collision detections. */
+	public static double sqrDist(double origX, double origY, double destX, double destY)
 	{
 		double a = origX - destX;
 		double b = origY - destY;
@@ -70,8 +63,8 @@ public class GameMath
 		return a*a + b*b;
 	}
 	
-	
-	public static double getDist(double origX, double origY, double destX, double destY)
+	/** Returns the distance from one point to another. */
+	public static double dist(double origX, double origY, double destX, double destY)
 	{
 		double a = origX - destX;
 		double b = origY - destY;
@@ -79,7 +72,7 @@ public class GameMath
 		return Math.sqrt(a*a + b*b);
 	}
 	
-	/** Returns + to if faster to rotate clockwise. Returns - if faster to rotate counter-clockwise. Returns 0 if curAngle = destAngle. */
+	/** Returns + if faster to rotate clockwise. Returns - if faster to rotate counter-clockwise. Returns 0 if curAngle = destAngle. */
 	public static double rotateTowardAngle(double curAngle, double destAngle) {
 		// normalize curAngle to be in [0,360)
 		if(curAngle >= 360) curAngle -= 360*((int)curAngle/360);
@@ -104,7 +97,14 @@ public class GameMath
 	
 	
 	
-	
+	/** 
+    * Returns the signed normal distance of point p from a vector intersecting q in the direction towards r. 
+    * If the result is positive, then p is above the vector. 
+    * If it is negative, then p is below the vector.  
+    * @param q    The "start" point of the vector.
+    * @param r    The "end" point of the vector.
+    * @param p    The point we're checking to be above or below the vector.
+    */
 	public static double isPointAboveVector(Point2D q, Point2D r, Point2D p) {
 		// vector b pointing in the direction of this segment from q to r. 
 		double bx = r.getX() - q.getX();
