@@ -118,7 +118,7 @@ bin, lib, and other folders.</echo>
 		<uptodate property="jar.uptodate"
 			targetfile="${build.latest}/${build.jar}">
 			<srcfiles dir="${build.bin}" includes="**/*.class"/>
-			<srcfiles dir="${build.resources}" includes="**/*.*"/>
+			<!-- srcfiles dir="${build.resources}" includes="**/*.*"/ -->
 		</uptodate>
 	</target>
 
@@ -135,7 +135,7 @@ bin, lib, and other folders.</echo>
 			destfile		="${build.latest}/${build.jar}"
 			index			="true">
 			<fileset dir="${build.bin}"/>
-			<fileset dir="${build.resources}"/>
+			<!-- fileset dir="${build.resources}"/ -->
 			<manifest>
 				<attribute name="Build-Date" value="${DSTAMP}"/>
 			</manifest>
