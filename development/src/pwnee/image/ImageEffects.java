@@ -10,15 +10,15 @@ import javax.swing.*;
 public class ImageEffects {
 	
    /** Produces an image using a cropped section of the source image. */
-   public static Image crop(Image srcImage, x, y, w, h) {
-      ImageProducer ip = new FilteredImageSource(source, new CropImageFilter(x,y,w,h));
+   public static Image crop(Image srcImage, int x, int y, int w, int h) {
+      ImageProducer ip = new FilteredImageSource(srcImage.getSource(), new CropImageFilter(x,y,w,h));
 		
 		Image result = Toolkit.getDefaultToolkit().createImage(ip);
 		return result;
    }
    
 	/** Produces an image with one color set to be completely transparent. */
-	public static Image setTransparentColor(Image srcImg, Color transColor) {	
+	public static Image setTransparentColor(Image srcImg, final Color transColor) {	
 		ImageFilter filter = new RGBImageFilter() {
 			public int transHex = transColor.getRGB() | 0xFF000000;
 			
@@ -54,11 +54,11 @@ public class ImageEffects {
    /** 
     * Produces an image with a uniform opacity applied to all pixels that aren't completely transparent. 
     * @param srcImg     the source image
-    * @param alpha      the value that will be assigned to the pixels' alpha components in the range [0,255].
+    * @param _alpha      the value that will be assigned to the pixels' alpha components in the range [0,255].
     */
-   public static Image setOpacity(Image srcImg, int alpha) {	
+   public static Image setOpacity(Image srcImg, int _alpha) {	
       // normalize alpha to be in the range [0,255]
-      alpha = Math.min(255, Math.max(0, alpha));
+      final int alpha = Math.min(255, Math.max(0, _alpha));
       
 		ImageFilter filter = new RGBImageFilter() {
 			public int  filterRGB(int x, int y, int rgb) {
@@ -151,16 +151,16 @@ public class ImageEffects {
 			pg.grabPixels();
 		} 
 		catch (InterruptedException e) {
-			return srcImage;
+			return srcImg;
 		}
 		if ((pg.getStatus() & ImageObserver.ABORT) != 0) {
-			return srcImage;
+			return srcImg;
 		}
 			
 		ImageFilter filter = new RGBImageFilter() {
 			public int filterRGB(int x, int y, int rgb) {
             if((rgb & 0xFF000000) == 0)
-               return rgb
+               return rgb;
 				int curAlpha = ( pixels[y*w + x] & 0x000000FF);
 				
 				return (rgb & 0x00FFFFFF) + (curAlpha << 24);

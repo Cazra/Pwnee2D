@@ -63,9 +63,8 @@ public abstract class Sprite {
 	
    /** A convenient array of doubles that can be used for whatever. */
 	public double[] vars = new double[10];
-   for(int i = 0; i < 10; i++) {
-      vars[i] = 0.0;
-   }
+   
+   
 	
 	
 	// CONSTRUCTORS
@@ -79,6 +78,10 @@ public abstract class Sprite {
 	public Sprite(double x, double y) {
 		this.x = x;
 		this.y = y;
+      
+      for(int i = 0; i < 10; i++) {
+         vars[i] = 0.0;
+      }
 	}
 	
 	/** Marks this Sprite as destroyed. You may also want to override this method to do additional processing when this Sprite is destroyed.*/
@@ -113,7 +116,7 @@ public abstract class Sprite {
 		AffineTransform curTrans = g.getTransform();
 		curTrans.translate(this.x,this.y);
 		curTrans.concatenate(this.transform);
-		curTrans.translate(0-focalX,0-fy);
+		curTrans.translate(0-focalX,0-focalY);
 		g.setTransform(curTrans);
 		
       // The draw method shall be defined by the user.
@@ -129,7 +132,7 @@ public abstract class Sprite {
     * The user is expected to define this to do their own custom drawing.
 	 * @param g		The Graphics context this is being rendered with.
 	 **/
-   public abstract void draw(Graphics2D g)
+   public abstract void draw(Graphics2D g);
    
 	
 	// COLOR TRANSFORM METHODS
@@ -150,14 +153,11 @@ public abstract class Sprite {
 		this.scaleX = x;
 		this.scaleY = y;
 		this.transformChanged = true;
-		
-		this.rx = this.r * x;
-		this.ry = this.r * y;
 	}
 	
    /** Sets the rotation component of this Sprite's transform. */
 	public void rotate(double degrees) {
-		this.rotation = degrees;
+		this.angle = degrees;
 		this.transformChanged = true;
 	}
 	

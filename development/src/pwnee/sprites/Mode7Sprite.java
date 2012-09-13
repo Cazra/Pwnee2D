@@ -51,7 +51,7 @@ public abstract class Mode7Sprite extends BlitterSprite {
 	// RENDERING METHODS
 	
    
-	protected void draw(Graphics2D g) {
+	public void draw(Graphics2D g) {
 		BufferedImage mode7Img = new BufferedImage((int) width,(int) height - 1,BufferedImage.TYPE_INT_ARGB);
 		int[] writePixels = ((DataBufferInt)(mode7Img.getRaster().getDataBuffer())).getData(); 
 		
@@ -65,7 +65,7 @@ public abstract class Mode7Sprite extends BlitterSprite {
 		for(int j = 1; j < height; j++) {	
 			for(int i = 0; i < width; i++) {	
 				// transform our pixel coordinates. 
-            int[] pix = getPixelAt(i,j,camDx,camDy,rCos,rSin,horizonCenter,aspectRatio);
+            int[] pix = transformPixel(i,j);
 				int pixX = pix[0];
 				int pixY = pix[1];
 				
@@ -79,12 +79,12 @@ public abstract class Mode7Sprite extends BlitterSprite {
             
             // apply image wrapping if our flags are true.
             if(srcWrapX) {
-               pixX = pix.x % pixWidth;
+               pixX = pixX % pixWidth;
                if(pixX < 0)
                   pixX = pixWidth+pixX;
             }
             if(srcWrapY) {
-               pixY = pix.y % pixHeight;
+               pixY = pixY % pixHeight;
                if(pixY < 0)
                   pixY = pixHeight+pixY;
             }
@@ -98,7 +98,7 @@ public abstract class Mode7Sprite extends BlitterSprite {
 					if(!showCamPoint || !isCamPoint)
 						writePixels[(int)width*(j-1)+i] = pixelColor;
 					else
-						writePixels[(int)width*(j-1)+i] = camColor;
+						writePixels[(int)width*(j-1)+i] = curCamColor;
 				}
 				catch(Exception ex) {
 					System.out.println("Mode7Sprite - error writing pixels to result image");
@@ -141,7 +141,8 @@ public abstract class Mode7Sprite extends BlitterSprite {
 		
 		int rpixX = (int)(pixX*camCos - pixY*camSin + camDx);
 		int rpixY = (int)(pixX*camSin + pixY*camCos + camDy);
-		return {rpixX,rpixY};
+      int[] result = {rpixX,rpixY};
+		return result;
 	}
 }
 

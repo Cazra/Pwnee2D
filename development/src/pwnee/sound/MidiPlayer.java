@@ -115,7 +115,6 @@ public class MidiPlayer {
       this.stop();
       seqr.close();
       synth.close();
-      midiFile = null;
       loaded = false;
    }
    

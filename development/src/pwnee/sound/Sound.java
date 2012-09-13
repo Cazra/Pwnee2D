@@ -17,8 +17,6 @@ public class Sound {
 	public Sound(String name) {
 		try {
 			soundURL =  getClass().getClassLoader().getResource(name);
-			loadFile(soundURL);
-			
 			instances = 0;
 		}
 		catch(Exception ex) {
@@ -113,7 +111,7 @@ class SoundThread extends Thread {
 			}
 		}
 		catch(Exception e) {
-			System.err.println("SoundThread - error playing instance of sound " + parentSound.soundURL.getFile());
+			System.err.println("SoundThread - error playing instance of sound " + parent.soundURL.getFile());
 		}
 	}
 	

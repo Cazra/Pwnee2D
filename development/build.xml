@@ -45,7 +45,7 @@ bin, lib, and other folders.</echo>
 		<property name="build.doc"  	value="${build.base}/doc"/>
 		<property name="build.bin"  	value="${build.base}/bin"/>
 		<property name="build.resources" value="${build.base}/resources"/>
-		<property name="build.jar"		value="YoBro.jar"/>
+		<property name="build.jar"		value="pwnee.jar"/>
 		<property name="build.latest"	value="${build.base}/latest"/>
 		<echo level="info">Using Java at ${env.JAVA_HOME}.</echo>
 		<path id="build.classpath">
@@ -106,7 +106,6 @@ bin, lib, and other folders.</echo>
 			destdir		="${build.doc}/api"
 			classpathref	="build.classpath"
 			Doctitle	="${configuration.name} API Version ${configuration.version.major}.${configuration.version.minor} Build ${DSTAMP}${TSTAMP}">
-			<include name="**/*.java"/>
 		</javadoc>
 		<echo level="info">API documentation is available in ${build.doc}/api.</echo>
 	</target>
@@ -139,7 +138,6 @@ bin, lib, and other folders.</echo>
 			<fileset dir="${build.resources}"/>
 			<manifest>
 				<attribute name="Build-Date" value="${DSTAMP}"/>
-				<attribute name="Main-Class" value="YoBroMain"/>
 			</manifest>
 		</jar>
 		<echo level="info">New ${build.jar} built in ${build.latest}.</echo>

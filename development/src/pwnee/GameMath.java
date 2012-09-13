@@ -15,7 +15,7 @@ public class GameMath {
    
    /** Converts an angle from radians to degrees. */
    public static double r2d(double radians) {
-      return radians*180.0/Math.PI
+      return radians*180.0/Math.PI;
    }
 	
    /** Computes the sine of an angle given in degrees. */

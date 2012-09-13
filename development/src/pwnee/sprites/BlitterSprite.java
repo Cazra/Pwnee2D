@@ -24,7 +24,7 @@ public abstract class BlitterSprite extends Sprite {
    
    /** Flag for wrapping over the source image's pixels on its Y axis. If this is false and we go out of bounds, the color for our pixel will be transparent. */
    public boolean srcWrapY = true;
-   
+      
 	/** 
     * Creates the BlitterSprite. 
     * @param srcImg  The source image for the Sprite.
@@ -53,7 +53,7 @@ public abstract class BlitterSprite extends Sprite {
     * more complicated effects, like make a blittered image from multiple source images.
     * @param g    The transformed graphics context.
     */
-	protected void draw(Graphics2D g) {
+	public void draw(Graphics2D g) {
 		
 		// obtain the image raster that we will write the pixels of our resulting image to
 		BufferedImage img = new BufferedImage((int) width,(int) height,BufferedImage.TYPE_INT_ARGB);
@@ -79,12 +79,12 @@ public abstract class BlitterSprite extends Sprite {
             
             // apply image wrapping if our flags are true.
             if(srcWrapX) {
-               pixX = pix.x % pixWidth;
+               pixX = pixX % pixWidth;
                if(pixX < 0)
                   pixX = pixWidth+pixX;
             }
             if(srcWrapY) {
-               pixY = pix.y % pixHeight;
+               pixY = pixY % pixHeight;
                if(pixY < 0)
                   pixY = pixHeight+pixY;
             }
@@ -109,16 +109,16 @@ public abstract class BlitterSprite extends Sprite {
 	}
 	
    /** Used to compute any values that will be the same for all the pixels during the blittering. These values should be stored as member variables of this Sprite. */
-   public abstract void computeReusedValues() 
+   public abstract void computeReusedValues();
    
 	/** Converts from rendering coordinates to source image pixel coordinates*/
-	public abstract int[] transformPixel(double i,double j)
+	public abstract int[] transformPixel(double i,double j);
    
    /** Loads the pixels from the source image into our pixels array. Also loads the width and height of the image into pixWidth and pixHeight. */
    protected void grabPixels() {
       // obtain the source image's pixels and its width/height
 		if(pixels == null) {
-			PixelGrabber pg = new PixelGrabber(this.curImage, 0,0, -1, -1, false);
+			PixelGrabber pg = new PixelGrabber(this.srcImg, 0,0, -1, -1, false);
 			try {
 				pg.grabPixels();
 			}

@@ -43,7 +43,8 @@ public abstract class WrappingImageSprite extends BlitterSprite {
 		i-=width/2;
 		j-=height/2;
 		Point2D rotated = new Point((int)(i*camCos - j*camSin), (int)(i*camSin + j*camCos));
-		return {(int)((rotated.getX()*cameraZoom + cameraX)), (int)((rotated.getY()*cameraZoom + cameraY))};
+      int[] result = {(int)((rotated.getX()*cameraZoom + cameraX)), (int)((rotated.getY()*cameraZoom + cameraY))};
+		return result;
 	}
 	
 }
