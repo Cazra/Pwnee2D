@@ -6,9 +6,17 @@ import java.awt.image.*;
 import javax.swing.*;
 
 
-/** A class with a bunch of static methods for applying color filters on images. */
+/** A class with a bunch of static methods for applying filters on images. */
 public class ImageEffects {
 	
+   /** Produces an image using a cropped section of the source image. */
+   public static Image crop(Image srcImage, x, y, w, h) {
+      ImageProducer ip = new FilteredImageSource(source, new CropImageFilter(x,y,w,h));
+		
+		Image result = Toolkit.getDefaultToolkit().createImage(ip);
+		return result;
+   }
+   
 	/** Produces an image with one color set to be completely transparent. */
 	public static Image setTransparentColor(Image srcImg, Color transColor) {	
 		ImageFilter filter = new RGBImageFilter() {
