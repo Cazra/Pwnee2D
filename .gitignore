@@ -2,3 +2,5 @@ development/doc
 development/bin
 development/latest
 development/**/pwnee.jar
+examples/**/bin
+examples/**/latest

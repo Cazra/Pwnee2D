@@ -112,16 +112,20 @@ public class Keyboard implements KeyListener {
          _justPressedRep.put(key, false);
          _justTyped.put(key, false);
          
-         if(pressedSinceLastFrame.get(key)) {
+         Boolean pslf = pressedSinceLastFrame.get(key);
+         if(pslf != null && pslf == true) {
             _justPressedRep.put(key, true);
-            if(!_isPressed.get(key))
+            
+            Boolean ip = _isPressed.get(key);
+            if(ip != null && ip == true)
                _justPressed.put(key, true);
             _isPressed.put(key, true);
             
             lastKeyPressed = key;
          }
          
-         if(releasedSinceLastFrame.get(key)) {
+         Boolean rslf = releasedSinceLastFrame.get(key);
+         if(rslf != null && rslf == true) {
             _justTyped.put(key,true);
             _isPressed.put(key, false);
          }
@@ -151,25 +155,29 @@ public class Keyboard implements KeyListener {
    
    /** For polling whether keys are currently being held. */
    public boolean isPressed(int key) {
-      if(_isPressed.get(key)) return true;
+      Boolean result = _isPressed.get(key);
+      if(result != null) return result;
       else return false;
    }
    
    /** For polling whether keys have just been pressed since the last frame. */
    public boolean justPressed(int key) {
-      if(_justPressed.get(key)) return true;
+      Boolean result = _justPressed.get(key);
+      if(result != null) return result;
       else return false;
    }
    
    /** Like _justPressed, but acts like _isPressed for keys that have been held for more than a couple seconds. */
    public boolean justPressedRep(int key) {
-      if(_justPressedRep.get(key)) return true;
+      Boolean result = _justPressedRep.get(key);
+      if(result != null) return result;
       else return false;
    }
    
    /** For polling whether keys have just been released since the last frame. */
    public boolean justTyped(int key) {
-      if(_justTyped.get(key)) return true;
+      Boolean result = _justTyped.get(key);
+      if(result != null) return result;
       else return false;
    }
    

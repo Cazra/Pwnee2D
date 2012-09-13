@@ -97,6 +97,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    /** Sets the frame rate (in frames per second) for the game's timer and starts the game. */
     public void start(int fps) {
         timer.setFPS(fps);
+        this.isRunning = true;
         timer.start();
     }
     
