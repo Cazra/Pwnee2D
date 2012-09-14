@@ -48,7 +48,7 @@ bin, lib, and other folders.</echo>
 		<property name="build.resources" value="${build.base}/resources"/>
 		<property name="build.jar"		value="example.jar"/>
 		<property name="build.latest"	value="${build.base}/latest"/>
-        <property name="build.main"		value="example.HelloMain"/>
+        <property name="build.main"		value="example.SpritesMain"/>
 		<echo level="info">Using Java at ${env.JAVA_HOME}.</echo>
 		<path id="build.classpath">
 			<pathelement path="${java.class.path}"/>

@@ -11,7 +11,7 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
     private GraphicsDevice grDev;
     private DisplayMode oldDisplay;
     
-    public GamePanel helloPanel;
+    public GamePanel spritesPanel;
     public boolean fullscreen = false;
     
     public SpritesMain(boolean fullscreen) {
@@ -33,15 +33,18 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
             setFullscreen();
 
         // Create main window panel and add it into the window.
-        helloPanel = new HelloPanel();
-        this.add(helloPanel);
+        spritesPanel = new SpritesPanel();
+        this.add(spritesPanel);
         
         // finishing touches on Game window
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
-
+         
+        // Start the GamePanel
+        spritesPanel.start(60);
+         
         // Request focus so that we can poll keyboard input in our game.
-        helloPanel.requestFocusInWindow();
+        spritesPanel.requestFocusInWindow();
         
         System.err.println("Game Window successfully created!!!");
     }
@@ -93,7 +96,7 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
     
      public void windowDeiconified(WindowEvent e) {
         System.err.println("Window Deiconified");
-        helloPanel.requestFocusInWindow();
+        spritesPanel.requestFocusInWindow();
     }
     
      public void windowIconified(WindowEvent e) {
@@ -106,7 +109,7 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
     
     public void windowGainedFocus(WindowEvent e) {
         System.err.println("Window gained focus");
-        helloPanel.requestFocusInWindow();
+        spritesPanel.requestFocusInWindow();
     }
     
     public void windowLostFocus(WindowEvent e)  {

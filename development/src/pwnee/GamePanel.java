@@ -67,23 +67,25 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    
    /** The game's timer event handler. This runs on the Event Dispatch Thread. We don't need to worry about synchronizing this method since the EventDispatch Thread handles only one event at a time. */
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == timer) {
-            // if the app isn't currently running, skip the timer event handler.
-            if(!this.isRunning)
-                return;
-             
-            // poll user input for this frame
-            keyboard.poll();
-             
-            // Run n iterations through our game's logic (most of the time, this will be 1.)
-            // Then perform 1 rendering iteration.
-            for(int i =0; i < stepsPerFrame; i++) {
-                this.logic();
-            }
-            this.repaint();
-         
-            timer.updateFrameRateCounter();
-        }
+         synchronized(this) {
+              if(e.getSource() == timer) {
+                  // if the app isn't currently running, skip the timer event handler.
+                  if(!this.isRunning)
+                      return;
+                   
+                  // poll user input for this frame
+                  keyboard.poll();
+                   
+                  // Run n iterations through our game's logic (most of the time, this will be 1.)
+                  // Then perform 1 rendering iteration.
+                  for(int i =0; i < stepsPerFrame; i++) {
+                      this.logic();
+                  }
+                  this.repaint();
+               
+                  timer.updateFrameRateCounter();
+              }
+         }
     }
    
     /** Performs 1 iteration through the game's logic. This is automatically called by the GamePanel's timer event handler. The user is expected to provide this method. */

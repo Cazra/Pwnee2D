@@ -10,8 +10,8 @@ public class SpritesPanel extends GamePanel {
     
     public SpritesPanel() {
         super();
-        this.start(60);
         
+        this.setPreferredSize(new Dimension(640, 480));
         for(int i = 0; i < 500; i++) {
             balls.add(new BallSprite(GameMath.rand.nextInt(640), GameMath.rand.nextInt(480)));
         }
@@ -35,7 +35,9 @@ public class SpritesPanel extends GamePanel {
         Graphics2D g2D = (Graphics2D) g;
         
         // render the balls
-        for(BallSprite ball
+        for(BallSprite ball : balls) {
+           ball.render(g2D);
+        }
         
         // Set our drawing color to black
         g2D.setColor(new Color(0x000000));

@@ -1,6 +1,6 @@
 package example;
 
-import java.awt.*
+import java.awt.*;
 import pwnee.sprites.Sprite;
 import pwnee.GameMath;
 
@@ -14,7 +14,7 @@ public class BallSprite extends Sprite {
     public double dy;
     
     /** Creates the BallSprite with a random velocity. */
-    public BallSprite(x,y) {
+    public BallSprite(int x, int y) {
         super(x,y);
         dx = GameMath.rand.nextDouble()*6-3;
         dy = GameMath.rand.nextDouble()*6-3;
@@ -55,11 +55,15 @@ public class BallSprite extends Sprite {
     
     /** Draws a green circle. */
     public void draw(Graphics2D g) {
-        g.setColor(new Color(0xAAFFAA));
+        g.setColor(new Color(0x55FF55));
         g.fillOval(-16,-16,32,32);
         
-        g.setColor(new Color(0x77AA77));
+        Stroke origStroke = g.getStroke();
+        
+        g.setColor(new Color(0x22AA22));
         g.drawOval(-16,-16,32,32);
+        
+        g.setStroke(origStroke);
     }
     
 }
