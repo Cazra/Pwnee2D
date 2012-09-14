@@ -31,6 +31,8 @@ package pwnee.image;
 import java.awt.MediaTracker;
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.net.URL;
 
 /** A class that can force the application to wait while it finishes loading new Images. */
 public class ImageLoader {
@@ -49,6 +51,11 @@ public class ImageLoader {
 		this.parent = parent;
 		this.reset();
 	}
+   
+   /** Creates an ImageLoader used only for loading images from a file. This doesn't initialize a MediaTracker and is only used by this class's static methods. */
+   public ImageLoader() {
+      // Do nothing.
+   }
 	
    /** Empties the ImageLoader. */
 	public void reset() {
@@ -74,6 +81,13 @@ public class ImageLoader {
 		reset();
 	}
 	
+   
+   /** A static method used to load an image from a file and return that image. */
+   public Image loadFromFile(String path) {
+      URL imageURL =  this.getClass().getClassLoader().getResource(path);
+      Image image = Toolkit.getDefaultToolkit().getImage(imageURL);
+      return image;
+   }
 	
 }
 
