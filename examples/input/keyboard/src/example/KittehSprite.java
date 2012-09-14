@@ -93,7 +93,7 @@ public class KittehSprite extends Sprite {
             frameNum = 2;
          
          // append the frame number to our direction to form our complete imgName.
-         imgName += frameNum
+         imgName += frameNum;
          
          // set the focal point of the monster to be its image's center.
          focalX = 12;
@@ -110,7 +110,7 @@ public class KittehSprite extends Sprite {
     
     
     /** Sets the direction for this Sprite's animation. */
-    public setDirection(char dir) {
+    public void setDirection(char dir) {
          if(dir == 'n' || dir == 'N')
             direction = "north";
          if(dir == 'w' || dir == 'W')
@@ -119,6 +119,18 @@ public class KittehSprite extends Sprite {
             direction = "south";
          if(dir == 'e' || dir == 'E')
             direction = "east";
+    }
+    
+    /** Makes the Sprite turn counterclockwise */
+    public void turnAround() {
+        if(direction == "north")
+            direction = "west";
+        else if(direction == "west")
+            direction = "south";
+        else if(direction == "south")
+            direction = "east";
+        else
+            direction = "north";
     }
     
     

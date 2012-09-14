@@ -15,7 +15,7 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
     public boolean fullscreen = false;
     
     public SpritesMain(boolean fullscreen) {
-        super("Hello World!");
+        super("Keyboard input");
         int screenX = 640;    
         int screenY = 480;
         this.setSize(screenX,screenY);

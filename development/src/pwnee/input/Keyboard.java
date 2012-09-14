@@ -117,7 +117,7 @@ public class Keyboard implements KeyListener {
             _justPressedRep.put(key, true);
             
             Boolean ip = _isPressed.get(key);
-            if(ip != null && ip == true)
+            if(ip == null || ip == false)
                _justPressed.put(key, true);
             _isPressed.put(key, true);
             
