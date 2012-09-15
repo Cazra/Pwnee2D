@@ -35,8 +35,8 @@ import java.util.HashMap;
 /** A class that can poll for keyboard input in a swing Component.*/
 public class Keyboard implements KeyListener {
 	
-   /** A reference to the Component observing the Keyboard. */
-   public Component observer;
+   /** A reference to the Component this Keyboard is observing events for. */
+   public Component publisher;
    
    /** True if any key was pressed or has remained pressed since the last frame */
    public boolean isAnyPressed = false;
@@ -80,10 +80,10 @@ public class Keyboard implements KeyListener {
    
    
    
-   /** Creates the Keyboard object and assigns a Component to observer it. */
-	public Keyboard(Component observer) {
-      this.observer = observer;
-      observer.addKeyListener(this);
+   /** Creates the Keyboard object and assign it a Component to observe events for. */
+	public Keyboard(Component publisher) {
+      this.publisher = publisher;
+      publisher.addKeyListener(this);
 	}
 	
 	public void poll() {

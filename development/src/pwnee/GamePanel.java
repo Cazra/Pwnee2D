@@ -45,6 +45,9 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    /** Used for polling keyboard input */
    public Keyboard keyboard;
    
+   /** Used for polling mouse input */
+   public Mouse mouse;
+   
    /** The game's ImageLoader, used to wait on filtered images to finish processing. */
    public ImageLoader imgLoader;
    
@@ -62,6 +65,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
         super();
         timer = new GameTimer(0, this);
         keyboard = new Keyboard(this);
+        mouse = new Mouse(this);
         imgLoader = new ImageLoader(this);
     }
    
@@ -75,6 +79,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
                    
                   // poll user input for this frame
                   keyboard.poll();
+                  mouse.poll();
                    
                   // Run n iterations through our game's logic (most of the time, this will be 1.)
                   // Then perform 1 rendering iteration.
