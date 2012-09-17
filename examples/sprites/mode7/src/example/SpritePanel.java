@@ -11,6 +11,8 @@ public class SpritePanel extends GamePanel {
     
     public Mode7Sprite mode7;
     
+    public SupmuwSprite monster;
+    
     public MidiPlayer midi;
     
     public SpritePanel() {
@@ -27,10 +29,15 @@ public class SpritePanel extends GamePanel {
         imgLoader.addImage(mode7Img);
         imgLoader.waitForAll();
         
+        SupmuwSprite.loadImages(imgLoader);
+        
         // Create the Mode7Sprite
         mode7 = new Mode7Sprite(mode7Img,0,100,640,380);
         mode7.elevation = 200;
         mode7.camDist = 200;
+        
+        // Create the monster sprite which will be positioned in the Mode7 world.
+        monster = new SupmuwSprite(0,0);
     }
     
     public void logic() {
@@ -67,6 +74,33 @@ public class SpritePanel extends GamePanel {
          if(keyboard.justPressed(KeyEvent.VK_ENTER)) {
             mode7.showCamPoint = !mode7.showCamPoint;
          }
+         
+         
+         // Position the monster sprite to be in the Mode7 object's world. We'll put it at (500,500) in mode7 coordinates. 
+         double[] pos = mode7.untransformPixel(500,500);
+         monster.x = mode7.x + pos[0];
+         monster.y = mode7.y + pos[1];
+         
+         // The untransform may put the monster somewhere weird if it's offscreen. 
+         // Make it invisible if this happens.
+         monster.isVisible = true;
+         if(monster.y < 0)
+            monster.isVisible = false;
+         
+         // scale the sprite to mimic perspective.
+         double monsterDist = GameMath.sqrDist(500,500,mode7.camDx, mode7.camDy)+mode7.elevation*mode7.elevation;
+         double sq1000 = 1000*1000;
+         monster.scale(sq1000/monsterDist, sq1000/monsterDist);
+         
+         // clip the monster sprite if it's too close
+         if(monsterDist < 50*50)
+            monster.isVisible = false;
+         
+         // clip the monster sprite if it's too far. Also account for overflow.
+         if(monsterDist > 10000*10000 || monsterDist < 0)
+            monster.isVisible = false;
+         
+         monster.animate();
     }
     
     public void paint(Graphics g) {
@@ -81,12 +115,16 @@ public class SpritePanel extends GamePanel {
         
         // render the mode7 Sprite
         mode7.render(g2D);
+        double[] point = mode7.untransformPixel(500,500);
+        
+        monster.render(g2D);
         
         // Set our drawing color to red
         g2D.setColor(new Color(0xFF0000));
-        
+
         // display the current frame rate.
         g2D.drawString("" + timer.fpsCounter, 10,32);
+        
         
         // draw other stats
         g2D.drawString("Camera focus position: (" + Math.round(mode7.cameraX) + ", " + Math.round(mode7.cameraY) + ")", 10,47);

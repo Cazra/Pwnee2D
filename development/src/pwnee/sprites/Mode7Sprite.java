@@ -63,12 +63,12 @@ public class Mode7Sprite extends BlitterSprite {
 	public boolean showCamPoint = false;
 	
    // private reused variables for the Mode7 transformation.
-   protected double camDx = 0;
-   protected double camDy = 0;
-   protected double camCos = 1;
-   protected double camSin = 0;
-   protected double aspectRatio = 1;
-   protected double horizonCenter = 0;
+   public double camDx = 0;
+   public double camDy = 0;
+   public double camCos = 1;
+   public double camSin = 0;
+   public double aspectRatio = 1;
+   public double horizonCenter = 0;
    
 	// CONSTRUCTOR
 	
@@ -160,8 +160,7 @@ public class Mode7Sprite extends BlitterSprite {
    }
    
    /** Performs a transformation to produce a tilted image plane effect. */
-	public int[] transformPixel(double i,double j)
-	{
+	public int[] transformPixel(double i,double j) {
 		double z = (elevation)/(j+horizonY);
 		double rasterX = (horizonCenter - i)*z;
 		
@@ -173,6 +172,18 @@ public class Mode7Sprite extends BlitterSprite {
       int[] result = {rpixX,rpixY};
 		return result;
 	}
+   
+   
+   public double[] untransformPixel(double x, double y) {
+      double u = x - camDx;
+      double v = y - camDy;
+      
+      double i = horizonCenter - elevation*aspectRatio*((u*camCos + v*camSin)/(v*camCos - u*camSin));
+      double j = horizonY + (elevation*(horizonCenter - i))/(v*camSin + u*camCos);
+      
+      double[] result = {i,j};
+      return result;
+   }
 }
 
 
