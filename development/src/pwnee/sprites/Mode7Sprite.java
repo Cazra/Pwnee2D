@@ -34,7 +34,7 @@ import java.awt.image.*;
 import pwnee.GameMath;
 
 /** Creates a fake 3D effect in which a source image is projected onto a tilted plane. */
-public abstract class Mode7Sprite extends BlitterSprite {
+public class Mode7Sprite extends BlitterSprite {
 	/** The angle in degrees of the direction that fake Mode7 camera is facing. */
    public double cameraAngle = 0;
    
@@ -119,19 +119,21 @@ public abstract class Mode7Sprite extends BlitterSprite {
 				
             // get our pixel if it is within our source image's bounds.
 				if(pixX >= 0 && pixX < pixWidth && pixY >= 0 && pixY < pixHeight) 
-               pixelColor =  pixels[pixY*pixWidth + pixX];
+               pixelColor = (0xFF000000 | pixels[pixY*pixWidth + pixX]);
             
             // write this pixel to our result image.
 				try {
 					if(!showCamPoint || !isCamPoint)
 						writePixels[(int)width*(j-1)+i] = pixelColor;
 					else
-						writePixels[(int)width*(j-1)+i] = curCamColor;
+						writePixels[(int)width*(j-1)+i] = camColors[curCamColor];
 				}
 				catch(Exception ex) {
 					System.out.println("Mode7Sprite - error writing pixels to result image");
 					ex.printStackTrace();
 				}
+            
+           // System.err.println("drew pixel color " + pixelColor + " at (" + i + ", " + j + ")");
 			}
 		}
 
@@ -141,18 +143,17 @@ public abstract class Mode7Sprite extends BlitterSprite {
 	
    /** Computes the translation and rotation values for the mode7 transform. Also iterates through the camera point colors. */
    public void computeReusedValues() {
-      double camDx = cameraX - camDist*GameMath.cos(cameraAngle);
-		double camDy = cameraY + camDist*GameMath.sin(cameraAngle);
+      camDx = cameraX - camDist*GameMath.cos(cameraAngle);
+		camDy = cameraY + camDist*GameMath.sin(cameraAngle);
 		
-		double rCos = GameMath.cos(180-cameraAngle+90);
-		double rSin = GameMath.sin(180-cameraAngle+90);
+		camCos = GameMath.cos(180-cameraAngle+90);
+		camSin = GameMath.sin(180-cameraAngle+90);
 		
-		int camColor = camColors[curCamColor];
 		curCamColor++;
 		
 		//AffineTransform rotation = AffineTransform.getRotateInstance(GameMath.d2r(180-cameraAngle+90));
-		double aspectRatio = width/height;
-		double horizonCenter = width/2.0;
+		aspectRatio = width/height;
+		horizonCenter = width/2.0;
 		
 		if(curCamColor > 2)
 			curCamColor = 0;
@@ -164,8 +165,8 @@ public abstract class Mode7Sprite extends BlitterSprite {
 		double z = (elevation)/(j+horizonY);
 		double rasterX = (horizonCenter - i)*z;
 		
-		int pixX = (int) (rasterX);// % pixWidth;
-		int pixY = (int) (elevation*z*aspectRatio);// % pixHeight;
+		int pixX = (int) (rasterX); 
+		int pixY = (int) (elevation*z*aspectRatio); 
 		
 		int rpixX = (int)(pixX*camCos - pixY*camSin + camDx);
 		int rpixY = (int)(pixX*camSin + pixY*camCos + camDy);

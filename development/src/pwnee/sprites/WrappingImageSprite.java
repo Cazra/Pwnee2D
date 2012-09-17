@@ -34,7 +34,7 @@ import java.awt.image.*;
 import pwnee.GameMath;
 
 /** Displays an infinitely wrapping image with a camera that can be moved, zoomed, and rotated. */
-public abstract class WrappingImageSprite extends BlitterSprite {
+public class WrappingImageSprite extends BlitterSprite {
    
    /** The rotation of the blittered image in degrees */
 	public double cameraAngle = 0;

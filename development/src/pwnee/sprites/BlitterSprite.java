@@ -119,7 +119,7 @@ public abstract class BlitterSprite extends Sprite {
             
             // get our pixel if it is within our source image's bounds.
 				if(pixX >= 0 && pixX < pixWidth && pixY >= 0 && pixY < pixHeight) 
-               pixelColor =  pixels[pixY*pixWidth + pixX];
+               pixelColor = (0xFF000000 | pixels[pixY*pixWidth + pixX]);
 				
             // write the pixel to our result image's pixel array.
 				try {
