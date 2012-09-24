@@ -30,35 +30,57 @@ package pwnee;
 
 import java.awt.Component;
 import java.awt.Graphics2D;
+import pwnee.input.*;
 import pwnee.image.ImageLoader;
 
-public abstract class Level
-{
-	public Component parent;
-	public ImageLoader imgLoader;
+/**
+ * A level is used as a abstract layer for game logic and rendering.
+ * It can be used as an actual level for a game, or as a containing logic layer 
+ * for groups of levels, forming a level hierarchy.
+ */
+public abstract class Level {
+   
+   /** The level above this level. Optional. */
+	public Level parent;
+   
+   /** The GamePanel this level is running in. */
+   public GamePanel game;
+   
+   /** Convenient reference to the game's Keyboard. */
+   public Keyboard keyboard;
+   
+   /** Convenient reference to the game's mouse. */
+   public Mouse mouse;
 	
-	public Level(Component parent)
-	{
+   /** Creates the level and calls its loadData method to load its resources, if any. */
+	public Level(GamePanel game, Level parent) {
 		this.parent = parent;
-		imgLoader = new ImageLoader(parent);
+		this.game = game;
+      this.keyboard = game.keyboard;
+      this.mouse = game.mouse;
+      
+      loadData();
 	}
+   
+   
+   /** Creates the level without a containing level. */
+   public Level(GamePanel game) {
+      this(game, null);
+   }
 	
+   
+   // The user is expected to implement all of the following methods:
 	
-	
+	/** Loads the resources needed by this level. */
 	public abstract void loadData();
+   
+   /** Performs cleanup duties for when we are done using this level, */
+   public abstract void clean();
+   
+   /** Performs 1 iteration through the level's logic. May call logic of lower levels. */
+	public abstract void logic();
 
-	
-	public void clean()
-	{
-		imgLoader = null;
-		parent = null;
-	}
-	
-
-	
-	public abstract void timerLoop();
-
-	
+   /** Performs rendering for this level. May call render of lower levels. */
 	public abstract void render(Graphics2D g2D);
 }
 
