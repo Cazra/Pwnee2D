@@ -15,18 +15,9 @@ public class BreakoutPanel extends GamePanel {
     
     /** Our sound player. */
     public SoundPlayer sounds;
-    
-    /** Our game's current level. */
-    public Level curLevel = null;
-    
-    /** Flag to let our game know that we need to change levels at the before performing any logic or rendering on an iteration. */
-    public boolean changingLevel = false;
-    
+
     /** The player's score as a game global variable. */
     public int score = 0;
-    
-    /** The name of the level we are switching to if changingLevel is true. */
-    public String changeToLevelName = "";
     
     public BreakoutPanel() {
         super();
@@ -40,9 +31,7 @@ public class BreakoutPanel extends GamePanel {
     }
     
     public void logic() {
-         // change our level if we are scheduled to do so.
-         if(changingLevel)
-            doChangeLevel();
+         super.logic();
             
          if(this.isLoading)
             return;
@@ -79,39 +68,20 @@ public class BreakoutPanel extends GamePanel {
     }
     
     
-    /** Schedules the game to change to a different level on the next timer event. */
-    public void changeLevel(String name) {
-         this.changingLevel = true;
-         this.changeToLevelName = name;
-    }
-    
-    
     /** 
-     * Cleans up after the current level and then switches to a new level matching changeToLevelName before performing any logic or rendering on a game iteration.
+     * Returns an instance of the Level type used in this game associated with levelName. 
+     * This is automatically called by Pwnee's internal level changing methods at the beginning 
+     * of the frame after we tell our game to switch levels.
      */
-    private void doChangeLevel() {
-         this.isLoading = true;
-         
-         this.changingLevel = false;
-         
-         // TODO: create a thread that performs the level's resource loading for us so 
-         // that we can display a loading screen instead of just freezing while it loads.
-         
-         if(curLevel != null)
-            curLevel.clean();
-         
-         // swith to the level matching the name we gave.
-         // In our breakout game, we only have 3 levels to switch among.
-         if(changeToLevelName == "title") 
-            curLevel = new TitleLevel(this);
-         else if(changeToLevelName == "breakout")
-            curLevel = new BreakoutLevel(this);
-         else if(changeToLevelName == "gameOver")
-            curLevel = new GameOverLevel(this);
-         else
-            System.err.println("BreakoutPanel change level error : " + changeToLevelName + " is not a level in this game.");
-         
-         this.isLoading = false;
+    public Level makeLevelInstance(String levelName) {
+        if(levelName == "title") 
+           return new TitleLevel(this);
+        else if(levelName == "breakout")
+           return new BreakoutLevel(this);
+        else if(levelName == "gameOver")
+           return new GameOverLevel(this);
+        else
+           return null;
     }
 }
 

@@ -60,6 +60,20 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    /** Flag for whether the game is currently running. If this is false, then all timer events will be skipped by the timer event handler. */
    public boolean isRunning = false;
    
+   /** Our game's current level. */
+    public Level curLevel = null;
+    
+   /** Flag to let our game know that we need to change levels at the before performing any logic or rendering on an iteration. */
+   public boolean changingLevel = false;
+
+   /** The player's score as a game global variable. */
+   public int score = 0;
+
+   /** The name of the level we are switching to if changingLevel is true. */
+   public String changeToLevelName = "";
+   
+   
+   
    /** Initializes the GamePanel and its components. */
     public GamePanel() {
         super();
@@ -93,8 +107,23 @@ public abstract class GamePanel extends JPanel implements ActionListener {
          }
     }
    
-    /** Performs 1 iteration through the game's logic. This is automatically called by the GamePanel's timer event handler. The user is expected to provide this method. */
-    public abstract void logic();
+    /** 
+     * Performs 1 iteration through the game's logic. 
+     * This is automatically called by the GamePanel's timer event handler. 
+     * Code is provided here for changing levels, but the user is expected to override this and 
+     * implement their own game logic code. 
+     */
+    public void logic() {
+        // change our level if we are scheduled to do so.
+         if(changingLevel)
+            doChangeLevel();
+            
+        //// example:
+        // maybe do some stuff();
+        //
+        //// run our current level's logic code.
+        // curLevel.logic();
+    }
    
     /** The top level rendering method for our game. This is automatically called by the GamePanel's timer event handler via repaint(). The user is expected to override this to do their own custom painting. */
     public void paint(Graphics g) {
@@ -112,7 +141,50 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     public void start() {
         start(60);
     }
-   
+    
+    /** Schedules the game to change to a different level on the next timer event. */
+    public void changeLevel(String name) {
+         this.changingLevel = true;
+         this.changeToLevelName = name;
+    }
+    
+    /** 
+     * Cleans up after the current level and then switches to a new level matching changeToLevelName before performing any logic or rendering on a game iteration.
+     */
+    private void doChangeLevel() {
+         this.isLoading = true;
+         
+         this.changingLevel = false;
+         
+         // TODO: create a thread that performs the level's resource loading for us so 
+         // that we can display a loading screen instead of just freezing while it loads.
+         
+         if(curLevel != null)
+            curLevel.clean();
+         
+         // swith to the level matching the name we gave.
+         // In our breakout game, we only have 3 levels to switch among.
+         
+         Level newLevel = makeLevelInstance(changeToLevelName);
+         if(newLevel != null) {
+            curLevel = newLevel;
+         }
+         else {
+            System.err.println("GamePanel change level error : " + changeToLevelName + " is not a valid level in this game.");
+         }
+         
+         this.isLoading = false;
+    }
+    
+    /** 
+     * Returns an instance of a level associated with the given level name. 
+     * The user is expected to implement their own code for this method since 
+     * no games are likely to have the same mapping of names to Level subtype instances.
+     */
+    public Level makeLevelInstance(String levelName) {
+        return null;
+    }
+    
    
 }
 
