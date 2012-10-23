@@ -199,7 +199,7 @@ public abstract class Sprite {
       // Start with an ID transform
 		transform = new AffineTransform();
 		
-		transform.rotate(GameMath.d2r(angle));
+		transform.rotate(0-GameMath.d2r(angle));
 		transform.scale(scaleX,scaleY);
 	}
 	
