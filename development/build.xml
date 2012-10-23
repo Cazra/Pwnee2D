@@ -44,6 +44,7 @@ bin, lib, and other folders.</echo>
 		<property name="build.src"  	value="${build.base}/src"/>
 		<property name="build.doc"  	value="${build.base}/doc"/>
 		<property name="build.bin"  	value="${build.base}/bin"/>
+        <!-- property name="build.lib"  	value="${build.base}/lib"/ -->
 		<property name="build.resources" value="${build.base}/resources"/>
 		<property name="build.jar"		value="pwnee.jar"/>
 		<property name="build.latest"	value="${build.base}/latest"/>
@@ -51,6 +52,9 @@ bin, lib, and other folders.</echo>
 		<path id="build.classpath">
 			<pathelement path="${java.class.path}"/>
 			<pathelement path="${build.bin}"/>
+            <!-- fileset dir="${build.lib}">
+				<include name="**/*.jar"/>
+			</fileset -->
 		</path>
 		<property name="build.classpath" refid="build.classpath"/>
 		<echo level="info">  Build ....... ${DSTAMP}${TSTAMP}</echo>
@@ -119,6 +123,7 @@ bin, lib, and other folders.</echo>
 			targetfile="${build.latest}/${build.jar}">
 			<srcfiles dir="${build.bin}" includes="**/*.class"/>
 			<!-- srcfiles dir="${build.resources}" includes="**/*.*"/ -->
+            <!-- srcfiles dir="${build.lib}" includes="**/*.jar"/ -->
 		</uptodate>
 	</target>
 
@@ -135,6 +140,7 @@ bin, lib, and other folders.</echo>
 			destfile		="${build.latest}/${build.jar}"
 			index			="true">
 			<fileset dir="${build.bin}"/>
+            <!-- zipgroupfileset dir="${build.lib}" includes="**/*.jar"/ -->
 			<!-- fileset dir="${build.resources}"/ -->
 			<manifest>
 				<attribute name="Build-Date" value="${DSTAMP}"/>
