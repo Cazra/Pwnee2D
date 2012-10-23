@@ -73,6 +73,9 @@ public abstract class Sprite {
    /** used to store the Sprite's current rotate-scale transform */
 	public AffineTransform transform = new AffineTransform(); 
    
+   /** The complete affine transform used to render this sprite on the last frame. */
+   public AffineTransform curTrans = new AffineTransform();
+   
    /** 
 	 * This becomes true whenever any of the methods for manipulating 
 	 * this Sprite's rotation or scale are called. It lets the render method know to update 
@@ -153,6 +156,8 @@ public abstract class Sprite {
       // Restore the Graphics context's original transform and composite.
 		g.setTransform(oldTrans);
 		g.setComposite(oldComp);
+        
+        this.curTrans = curTrans;
 	}
 	
 	/**	
