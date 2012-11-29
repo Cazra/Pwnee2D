@@ -66,9 +66,6 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    /** Flag to let our game know that we need to change levels at the before performing any logic or rendering on an iteration. */
    public boolean changingLevel = false;
 
-   /** The player's score as a game global variable. */
-   public int score = 0;
-
    /** The name of the level we are switching to if changingLevel is true. */
    public String changeToLevelName = "";
    

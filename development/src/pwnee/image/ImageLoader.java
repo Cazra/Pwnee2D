@@ -32,6 +32,7 @@ import java.awt.MediaTracker;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
+import javax.swing.JPanel;
 import java.net.URL;
 
 /** A class that can force the application to wait while it finishes loading new Images. */
@@ -54,7 +55,7 @@ public class ImageLoader {
    
    /** Creates an ImageLoader used only for loading images from a file. This doesn't initialize a MediaTracker and is only used by this class's static methods. */
    public ImageLoader() {
-      // Do nothing.
+      this(new JPanel());
    }
 	
    /** Empties the ImageLoader. */

@@ -181,6 +181,12 @@ public class Keyboard implements KeyListener {
       else return false;
    }
    
+   
+   /** Forcefully resets isPressed */
+   public void endKeyHolds() {
+        _isPressed = new HashMap<Integer, Boolean>();
+   }
+   
 
 }
 

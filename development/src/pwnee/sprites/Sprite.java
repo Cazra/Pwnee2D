@@ -200,7 +200,7 @@ public abstract class Sprite {
 		transform = new AffineTransform();
 		
 		transform.rotate(0-GameMath.d2r(angle));
-		transform.scale(scaleX,scaleY);
+		transform.scale(scaleX*scaleUni,scaleY*scaleUni);
 	}
 	
 	
