@@ -29,6 +29,7 @@ package pwnee.fileio;
 ======================================================================*/
 
 import java.io.*;
+import java.util.zip.*;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -65,7 +66,7 @@ public class ObjectFileIO {
       byte[] bytes = obj2bytes(obj);
       
       if((options & COMPRESS) > 0) {
-        // TODO : compress bytes.
+        bytes = compressBytes(bytes);
       }
       
       if((options & ENCRYPT) > 0) {
@@ -85,7 +86,7 @@ public class ObjectFileIO {
       }
       
       if((options & DECOMPRESS) > 0) {
-        // TODO : decompress bytes.
+        bytes = decompressBytes(bytes);
       }
       
       return bytes2obj(bytes);
@@ -98,42 +99,12 @@ public class ObjectFileIO {
     
     /** Saves obj to the file specified by path. Returns true if successful. */
     public boolean saveObject(Serializable obj, String path) {
-        boolean result = false;
-        
-        FileOutputStream fos = null;
-        ObjectOutputStream oos = null;
-        
-        try {
-            fos = new FileOutputStream(path);
-            oos = new ObjectOutputStream(fos);
-            oos.writeObject(obj);
-            result = true;
-            oos.close();
-            fos.close();
-        }
-        catch (Exception e) {
-            System.err.println("ObjectFileIO - failed to write to file " + path);
-        }
-        return result;
+        return saveObject(obj, path, 0);
     }
     
     /** Loads the object from the file specified by path. */
     public Object loadObject(String path) {
-        Object result = null;
-        
-        try {
-            FileInputStream fis = new FileInputStream(path);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            
-            result = ois.readObject();
-            ois.close();
-            fis.close();
-        }
-        catch (Exception e) {
-            System.err.println("ObjectFileIO - failed to load from file " + path);
-        }
-        
-        return result;
+        return loadObject(path, 0);
     }
     
     
@@ -200,7 +171,7 @@ public class ObjectFileIO {
     /** 
      * Loads, decrypts, and returns an array of bytes from a file specified by path. 
      * Typically these bytes are used to construct a string representing game-save data. 
-     * * @deprecated Use loadObject(Serializable obj, String path, int options) 
+     * @deprecated Use loadObject(Serializable obj, String path, int options) 
      *    with the option ObjectFileIO.DECRYPT instead.
      */
     public byte[] loadCryptoBytes(String path) {
@@ -254,6 +225,57 @@ public class ObjectFileIO {
     
     
     
+    /** Compresses an array of bytes using GZIP. */
+    public byte[] compressBytes(byte[] orig) {
+      try { 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream gzos = new GZIPOutputStream(baos);
+        gzos.write(orig);
+        
+        baos.close();
+        gzos.close();
+        
+        return baos.toByteArray();
+      }
+      catch (Exception e) {
+        System.err.println("ObjectFileIO - compression failed. ");
+        return orig;
+      }
+    }
+    
+    /** Decompresses an array of bytes using GZIP. */
+    public byte[] decompressBytes(byte[] bytes) {
+      try { 
+        int numBytes = 0;
+        
+        // on our first pass, we will figure out the size of the uncompressed data.
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        GZIPInputStream gzis = new GZIPInputStream(bais);
+        while(gzis.available() == 1) {
+          gzis.read();
+          numBytes++;
+        }
+        bais.close();
+        gzis.close();
+        
+        byte[] orig = new byte[numBytes];
+
+        // on our second pass, we will actually read the uncompressed data into a byte array.
+        bais = new ByteArrayInputStream(bytes);
+        gzis = new GZIPInputStream(bais);
+        for(int i = 0; i < numBytes; i++) {
+          orig[i] = (byte) gzis.read();
+        }
+        bais.close();
+        gzis.close();
+        
+        return orig;
+      }
+      catch (Exception e) {
+        System.err.println("ObjectFileIO - compression failed. ");
+        return null;
+      }
+    }
     
     
     
@@ -305,10 +327,13 @@ public class ObjectFileIO {
         String origString;
         String loadedString;
         
+        origString = "The quick brown fox jumped over the lazy dog.";
+        
+        
+        
         
         System.out.println("--- No encryption ---");
         
-        origString = "The quick brown fox jumped over the lazy dog.";
         System.out.println("Original string: " + origString);
         fileIO.saveObject(origString,"savedString.txt");
         
@@ -321,13 +346,23 @@ public class ObjectFileIO {
         System.out.println("--- Encryption with Blowfish using key 'cupcakes' ---");
         fileIO.encryptorString = "cupcakes";
         
-        origString = "The quick brown fox jumped over the lazy dog.";
         System.out.println("Original string: " + origString);
-        fileIO.saveCryptoBytes(origString.getBytes(),"cryptoString.txt");
+        fileIO.saveObject(origString, "cryptoString.txt", ObjectFileIO.ENCRYPT);
         
-        loadedString = new String(fileIO.loadCryptoBytes("cryptoString.txt"));
+        loadedString = (String) fileIO.loadObject("cryptoString.txt", ObjectFileIO.DECRYPT);
         System.out.println("Loaded string: " + loadedString);
         
+        
+        
+        System.out.println();
+        
+        System.out.println("--- Encryption with Blowfish using key 'cupcakes' | GZIP Compression ---");
+        
+        System.out.println("Original string: " + origString);
+        fileIO.saveObject(origString, "cryptoStringCompressed.txt", ObjectFileIO.ENCRYPT | ObjectFileIO.COMPRESS);
+        
+        loadedString = (String) fileIO.loadObject("cryptoStringCompressed.txt", ObjectFileIO.DECRYPT | ObjectFileIO.DECOMPRESS);
+        System.out.println("Loaded string: " + loadedString);
         
     }
 }
