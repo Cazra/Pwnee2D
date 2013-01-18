@@ -209,7 +209,7 @@ public abstract class Sprite {
 	
 	/** Returns the bounding box of the Sprite as a Rectangle2D object. */
 	public Rectangle2D getCollisionBox() {	
-		return new Rectangle2D.Double(x,y,width,height);
+		return new Rectangle2D.Double(x-focalX*scaleX, y-focalY*scaleY, width*scaleX, height*scaleY);
 	}
    
    /**

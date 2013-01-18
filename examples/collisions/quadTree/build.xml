@@ -44,22 +44,23 @@ bin, lib, and other folders.</echo>
 		<property name="build.src"  	value="${build.base}/src"/>
 		<property name="build.doc"  	value="${build.base}/doc"/>
 		<property name="build.bin"  	value="${build.base}/bin"/>
-        <!-- property name="build.lib"  	value="${build.base}/lib"/ -->
+        <property name="build.lib"  	value="${build.base}/lib"/>
 		<property name="build.resources" value="${build.base}/resources"/>
-		<property name="build.jar"		value="pwnee.jar"/>
+		<property name="build.jar"		value="example.jar"/>
 		<property name="build.latest"	value="${build.base}/latest"/>
+        <property name="build.main"		value="example.SpritesMain"/>
 		<echo level="info">Using Java at ${env.JAVA_HOME}.</echo>
 		<path id="build.classpath">
 			<pathelement path="${java.class.path}"/>
 			<pathelement path="${build.bin}"/>
-            <!-- fileset dir="${build.lib}">
+            <fileset dir="${build.lib}">
 				<include name="**/*.jar"/>
-			</fileset -->
+			</fileset>
 		</path>
 		<property name="build.classpath" refid="build.classpath"/>
 		<echo level="info">  Build ....... ${DSTAMP}${TSTAMP}</echo>
 		<echo level="verbose">Using CLASSPATH=${build.classpath}.</echo>
-		<echo level="info">Starting build of Pwnee2D on ${TODAY} at ${TSTAMP}.</echo>
+		<echo level="info">Starting build of Pwnee example on ${TODAY} at ${TSTAMP}.</echo>
     </target>
 	
 	
@@ -102,16 +103,7 @@ bin, lib, and other folders.</echo>
    <!-- Build the Java API documentation if it is out of date. -->
 	<target name="docs" depends="doc-check" unless="doc.uptodate"
 		description="Generate the Javadoc.">
-		<echo level="info">The API documentation is out of date; rebuilding.</echo>
-		<mkdir dir="${build.doc}"/>
-		<mkdir dir="${build.doc}/api"/>
-		<javadoc
-			sourcepath		="${build.src}"
-			destdir		="${build.doc}/api"
-			classpathref	="build.classpath"
-			Doctitle	="${configuration.name} API Version ${configuration.version.major}.${configuration.version.minor} Build ${DSTAMP}${TSTAMP}">
-		</javadoc>
-		<echo level="info">API documentation is available in ${build.doc}/api.</echo>
+		
 	</target>
 
 
@@ -122,8 +114,8 @@ bin, lib, and other folders.</echo>
 		<uptodate property="jar.uptodate"
 			targetfile="${build.latest}/${build.jar}">
 			<srcfiles dir="${build.bin}" includes="**/*.class"/>
-			<!-- srcfiles dir="${build.resources}" includes="**/*.*"/ -->
-            <!-- srcfiles dir="${build.lib}" includes="**/*.jar"/ -->
+            <srcfiles dir="${build.lib}" includes="**/*.jar"/>
+			<srcfiles dir="${build.resources}" includes="**/*.*"/>
 		</uptodate>
 	</target>
 
@@ -140,10 +132,15 @@ bin, lib, and other folders.</echo>
 			destfile		="${build.latest}/${build.jar}"
 			index			="true">
 			<fileset dir="${build.bin}"/>
-            <!-- zipgroupfileset dir="${build.lib}" includes="**/*.jar"/ -->
-			<!-- fileset dir="${build.resources}"/ -->
+			<fileset dir="${build.resources}"/>
+            <archives>
+				<zips>
+					<fileset dir="${build.lib}" includes="**/*.jar"/>
+				</zips>
+			</archives>
 			<manifest>
 				<attribute name="Build-Date" value="${DSTAMP}"/>
+                <attribute name="Main-Class" value="${build.main}"/>
 			</manifest>
 		</jar>
 		<echo level="info">New ${build.jar} built in ${build.latest}.</echo>
