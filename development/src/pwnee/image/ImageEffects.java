@@ -164,6 +164,41 @@ public class ImageEffects {
 		
 		return result;
 	}
+  
+  /** Produces an image whose rgb values are decremented by an subtractive color. */
+	public static Image subColor(Image srcImg, Color subtractive) {	
+		final int r = subtractive.getRed();
+		final int g = subtractive.getGreen();
+		final int b = subtractive.getBlue();
+			
+		ImageFilter filter = new RGBImageFilter() {
+			public int  filterRGB(int x, int y, int rgb) {
+				int newr = ((rgb >> 16) & 0x000000FF) - r;
+				if(newr < 0)
+					newr = 0;
+					
+				int newg = ((rgb >> 8) & 0x000000FF) - g;
+				if(newg < 0)
+					newg = 0;	
+				
+				int newb = ((rgb) & 0x000000FF) - b;
+				if(newb < 0)
+					newb = 0;	
+				
+				int newrgb = rgb & 0xFF000000;
+				newrgb += (newr << 16);
+				newrgb += (newg << 8);
+				newrgb += (newb);
+				
+				return newrgb;
+			}
+		};
+		
+		ImageProducer ip = new FilteredImageSource(srcImg.getSource(),filter);
+		Image result = Toolkit.getDefaultToolkit().createImage(ip);
+		
+		return result;
+	}
 	
 	/** 
     * Produces an image with alpha values obtained from an alpha map image. 
