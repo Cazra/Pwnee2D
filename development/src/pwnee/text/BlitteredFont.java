@@ -1,4 +1,4 @@
-package example;
+package pwnee.text;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -49,6 +49,9 @@ public class BlitteredFont {
   /** Subtractive color formatting. */
   protected Color subColor;
   
+  /** Bold formatting */
+  protected boolean isBold = false;
+  
   /** 
    * Loads a blittered font from a source image file with the specified metrics.
    * @param mono      Whether the blittered font will be monospaced.
@@ -81,6 +84,8 @@ public class BlitteredFont {
    * In the default implementation, each character frame is assumed to have a 1-pixel border
    * (so each frame is 2 pixels apart). ASCII characters 32-47 are on the 1st row, 48-63 are on the 2nd,
    * 64-79 are on the 3rd, 80-95 are on the 4th, 96-111 are on the 5th, and 112-127 are on the 6th. 
+   * The frames containing the character images are all assumed to be the same size: monoWidth*charHeight.
+   *
    * You can override this method if you need to accomodate a different subset of the ASCII characters
    * or if you have other special needs for the characters' images.
    *
@@ -267,6 +272,7 @@ public class BlitteredFont {
       formatStr += "sc" + subColor.getRGB();
     }
     
+    
     // get the formatted character image. Either compute it if it doesn't exist, or use the one in the cache.
     Image cImg = images.get(c + formatStr);
     if(cImg == null) {
@@ -287,6 +293,12 @@ public class BlitteredFont {
     
     
     g.drawImage(cImg, cursorX, cursorY, null);
+    if(isBold) {
+      g.drawImage(cImg, cursorX+1, cursorY, null);
+      g.drawImage(cImg, cursorX, cursorY-1, null);
+      g.drawImage(cImg, cursorX+1, cursorY-1, null);
+    }
+    
     return true;
   }
   
@@ -353,6 +365,16 @@ public class BlitteredFont {
       subColor = null;
       return true;
     }
+    // bold text on
+    else if(escSeq.equals("b")) {
+      isBold = true;
+      return true;
+    }
+    // bold text off
+    else if(escSeq.equals("br")) {
+      isBold = false;
+      return true;
+    }
     
     return false;
   }
@@ -377,6 +399,9 @@ public class BlitteredFont {
     String tag2Start = esc + "ac0xFFFFFF" + endEsc + esc + "sc0xFF4444" + endEsc;
     String tag2End = esc + "scr" + endEsc + esc + "acr" + endEsc;
     
+    String boldStart = esc + "b" + endEsc;
+    String boldEnd = esc + "br" + endEsc;
+    
     String testString = "";
     for(int i = 32; i <= 127; i++) {
       testString += (char) i;
@@ -386,7 +411,7 @@ public class BlitteredFont {
     }
     testString += "\n";
 
-    String brownFox = "The quick " + tag1Start + "brown fox" + tag1End + "\njumps over the\n" + tag2Start + "lazy" + tag2End + " dog.";
+    String brownFox = "The " + boldStart + "quick " + boldEnd + tag1Start + "brown fox" + tag1End + "\njumps over the\n" + tag2Start + "lazy" + tag2End + " dog.";
     testString += brownFox  + "\n" + brownFox.toUpperCase();
     
     return testString;

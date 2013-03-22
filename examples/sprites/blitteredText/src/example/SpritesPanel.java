@@ -4,6 +4,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import pwnee.*;
 import pwnee.image.ImageLoader;
+import pwnee.sprites.TextSprite;
+import pwnee.text.BlitteredFont;
 
 public class SpritesPanel extends GamePanel {
     

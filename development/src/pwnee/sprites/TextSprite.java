@@ -1,10 +1,10 @@
-package example;
+package pwnee.sprites;
 
 import java.awt.*;
 import java.awt.image.*;
 import java.util.HashMap;
-import pwnee.sprites.Sprite;
 import pwnee.image.*;
+import pwnee.text.BlitteredFont;
 
 public class TextSprite extends Sprite {
   public BlitteredFont bfont;

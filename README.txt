@@ -31,9 +31,6 @@ README
 
 Pwnee is a Java-based 2D game engine using Java's AWT and Swing libraries. 
 
-I'll eventually get around to expanding this README and creating some example applications. 
-Hang in there until then!
-
 All components and examples of Pwnee unless otherwise specified, have been developed and tested
 on a 64-bit computer running Windows 7, but it should also be able to run on any computer 
 with at least Java 6 properly installed.
@@ -72,7 +69,7 @@ Frequently Asked Questions:
 
 Q: Why is this game engine called "Pwnee"? 
 A: I already named my Javascript + Canvas game engine "Jage", so I couldn't also name 
-my Java game engine "Jage". And also, because pwnees are awesome.
+my Java game engine "Jage". I also like to make the non-bronies cringe. 
 
 Q: Is "Pwnee" an acronym for something?
 A: Not really, but I guess it could mean something like 
