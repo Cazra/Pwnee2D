@@ -15,6 +15,8 @@ public class SpritesPanel extends GamePanel {
     public TextSprite monoSprite;
     public TextSprite fittedSprite;
     
+    public TextSprite dimsSprite;
+    
     public SpritesPanel() {
         super();
         this.setPreferredSize(new Dimension(640, 480));
@@ -31,9 +33,16 @@ public class SpritesPanel extends GamePanel {
         monoSprite = new TextSprite(10, 10, monoFont, text);
         fittedSprite = new TextSprite(10,200, fittedFont, text);
         
+        dimsSprite = new TextSprite(250,50, fittedFont, "");
+        
     }
     
     public void logic() {
+      Dimension monoDim = monoFont.getDimensions(monoSprite.text);
+      Dimension fittedDim = fittedFont.getDimensions(fittedSprite.text);
+      
+      dimsSprite.text = "Mono size: (" + monoDim.width + ", " + monoDim.height + ")\n" + 
+                        "Fitted size: (" + fittedDim.width + ", " + fittedDim.height + ")\n";
     }
     
     public void paint(Graphics g) {
@@ -49,6 +58,7 @@ public class SpritesPanel extends GamePanel {
         // render the blittered Strings.
         monoSprite.render(g2D);
         fittedSprite.render(g2D);
+        dimsSprite.render(g2D);
         
         // Set our drawing color to black
         g2D.setColor(new Color(0x000000));

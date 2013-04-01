@@ -9,7 +9,8 @@ import pwnee.image.*;
  * A "font" used to display blittered text. (The characters are drawn using a 
  * source image instead of a font vector). 
  *
- * This class is meant to be used by a TextSprite to do its rendering.
+ * Instances of this class is meant to be used by one or more TextSprites 
+ * to do their rendering.
  */
 public class BlitteredFont {
     
@@ -303,7 +304,13 @@ public class BlitteredFont {
   }
   
   
-  
+  /** 
+   * Handler for escape sequences. 
+   * @param chars   The source character array
+   * @param i       The current index into chars.
+   * @return        The length of the escape sequence + 1. 
+   *                0, if the escape sequence is incomplete.
+   */
   protected int handleEscSequence(char[] chars, int i) {
     i++;
     String escSeq = "";
@@ -328,8 +335,18 @@ public class BlitteredFont {
   }
   
   
-  protected boolean interpretEscSequence(String escSeq) {
+  /** 
+   * Interprets and executes an escape character sequence. 
+   * Some escape sequences may affec the position of the cursor. 
+   * The cursor offset caused by the escape sequence is returned.
+   * @param escSeq    The escape character sequence.
+   * @return          The cursor offset caused by the escape sequence (usually +0,+0).
+   */
+  protected Dimension interpretEscSequence(String escSeq) {
     escSeq = escSeq.toLowerCase();
+    
+    int offX = 0;
+    int offY = 0;
     
     // additive coloring : ac[HEX_COLOR] e.g. ac0xFF0099
     if(escSeq.startsWith("ac0x")) {
@@ -337,8 +354,6 @@ public class BlitteredFont {
         escSeq = escSeq.substring(4);
         int rgb = Integer.parseInt(escSeq, 16);
         addColor = new Color(rgb);
-        
-        return true;
       }
       catch(Exception e) {
       }
@@ -346,7 +361,6 @@ public class BlitteredFont {
     // reset additive coloring : acr
     else if(escSeq.equals("acr")) {
       addColor = null;
-      return true;
     }
     // subtractive coloring : sc[HEX_COLOR] e.g. ac0xFF0099
     else if(escSeq.startsWith("sc0x")) {
@@ -354,8 +368,6 @@ public class BlitteredFont {
         escSeq = escSeq.substring(4);
         int rgb = Integer.parseInt(escSeq, 16);
         subColor = new Color(rgb);
-        
-        return true;
       }
       catch(Exception e) {
       }
@@ -363,21 +375,74 @@ public class BlitteredFont {
     // reset subtractive coloring : scr
     else if(escSeq.equals("scr")) {
       subColor = null;
-      return true;
     }
     // bold text on
     else if(escSeq.equals("b")) {
       isBold = true;
-      return true;
     }
     // bold text off
     else if(escSeq.equals("br")) {
       isBold = false;
-      return true;
     }
     
-    return false;
+    return new Dimension(offX, offY);
   }
+  
+  
+  /** 
+   * Determines the dimensions of a block of text rendered with this.
+   * @param txt The String to get the dimensions for.
+   * @return    The rendered dimensions of txt.
+   */
+  public Dimension getDimensions(String txt) {
+    char[] chars = txt.toCharArray();
+    int cursorX = 0;
+    int cursorY = 0;
+    
+    int w = 0;
+    int h = charHeight;
+    
+    for(int i = 0; i < chars.length; i++) {
+      char c = chars[i];
+      if(c == '\n') {
+        cursorX = 0;
+        cursorY += charHeight + vPadding;
+      }
+      else if(c == ' ') {
+        cursorX += spaceWidth + hPadding;
+      }
+      else if(c == esc) {
+        i += handleEscSequence(chars, i);
+      }
+      else {
+        try {
+          if(isMonospaced) {
+            cursorX += monoWidth;
+          }
+          else {
+            cursorX += charWidth.get(c);
+          }
+          cursorX += hPadding;
+        }
+        catch(Exception e) {
+          // We probably got here by trying to get the image for a 
+          // character not used as a key in images.
+        }
+      }
+      
+      if(cursorX > w)
+        w = cursorX;
+      if(cursorY + charHeight > h)
+        h = cursorY + charHeight;
+    }
+    
+    return new Dimension(w, h);
+  }
+  
+  
+  
+  
+  
   
   
   /** 
