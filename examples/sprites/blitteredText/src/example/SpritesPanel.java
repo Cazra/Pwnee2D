@@ -30,16 +30,21 @@ public class SpritesPanel extends GamePanel {
         fittedFont.loadImages(this.imgLoader, "graphics/myFont.png");
         
         String text = BlitteredFont.testString();
-        monoSprite = new TextSprite(10, 10, monoFont, text);
-        fittedSprite = new TextSprite(10,200, fittedFont, text);
+        monoSprite = new TextSprite(10, 10, monoFont, "Mono-spaced font: \n" + text);
+        fittedSprite = new TextSprite(250,100, fittedFont, "Fitted font: \n" + text);
         
         dimsSprite = new TextSprite(250,50, fittedFont, "");
         
+        monoSprite.maxWidth = 160;
+        fittedSprite.maxWidth = 160;
+        
+        monoSprite.lineWrap();
+        fittedSprite.lineWrap();
     }
     
     public void logic() {
-      Dimension monoDim = monoFont.getDimensions(monoSprite.text);
-      Dimension fittedDim = fittedFont.getDimensions(fittedSprite.text);
+      Dimension monoDim = monoSprite.getDimensions();
+      Dimension fittedDim = fittedSprite.getDimensions();
       
       dimsSprite.text = "Mono size: (" + monoDim.width + ", " + monoDim.height + ")\n" + 
                         "Fitted size: (" + fittedDim.width + ", " + fittedDim.height + ")\n";
@@ -59,6 +64,14 @@ public class SpritesPanel extends GamePanel {
         monoSprite.render(g2D);
         fittedSprite.render(g2D);
         dimsSprite.render(g2D);
+        
+        // Draw borders around the text sprites to demonstrate that they 
+        // are obeying their line-wrapping.
+        Dimension monoDim = monoSprite.getDimensions();
+        Dimension fittedDim = fittedSprite.getDimensions();
+        
+        g2D.drawRect((int) monoSprite.x, (int) monoSprite.y, monoSprite.maxWidth, monoDim.height);
+        g2D.drawRect((int) fittedSprite.x, (int) fittedSprite.y, fittedSprite.maxWidth, fittedDim.height);
         
         // Set our drawing color to black
         g2D.setColor(new Color(0x000000));

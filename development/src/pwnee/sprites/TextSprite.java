@@ -30,10 +30,36 @@ public class TextSprite extends Sprite {
   /** The current index into the paragraph list. */
   public int paraIndex = 0;
   
+  /** 
+   * The maximum width for the text. If -1, then there is no limit. 
+   * Otherwise the text will be line-wrapped accordingly.
+   */
+  public int maxWidth = -1;
+  
   public TextSprite(double x, double y, BlitteredFont bf, String txt) {
     super(x,y);
     bfont = bf;
     text = txt;
+  }
+  
+  
+  /** Sets the text and applies linewrapping if it can. */
+  public String setText(String txt) {
+    text = txt;
+    lineWrap();
+    return text;
+  }
+  
+  
+  /** Gets the unscaled dimensions of this sprite's text. */
+  public Dimension getDimensions() {
+    return bfont.getDimensions(text);
+  }
+  
+  
+  /** Applies linewrapping to the current text. */
+  public void lineWrap() {
+    text = bfont.lineWrap(text, maxWidth);
   }
   
   
@@ -67,6 +93,9 @@ public class TextSprite extends Sprite {
     catch(Exception e) {
       text = "Hello. I am ERROR.";
     }
+    
+    lineWrap();
+    
     return text;
   }
   
@@ -83,6 +112,9 @@ public class TextSprite extends Sprite {
     else {
       text = "Hello. I am ERROR.";
     }
+    
+    lineWrap();
+    
     return text;
   }
   
@@ -99,6 +131,9 @@ public class TextSprite extends Sprite {
     else {
       text = "Hello. I am ERROR.";
     }
+    
+    lineWrap();
+    
     return text;
   }
 }

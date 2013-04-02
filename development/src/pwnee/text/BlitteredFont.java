@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.HashMap;
 import pwnee.image.*;
+import pwnee.util.Pair;
 
 /**
  * A "font" used to display blittered text. (The characters are drawn using a 
@@ -143,47 +144,56 @@ public class BlitteredFont {
   
   /** Crops the source image so that its width is fitted to its nontransparent part. */
   protected Image fitCharWidth(Image src) {
-    int left = 0;
-    int right = monoWidth - 1;
-    
-    // obtain the pixel array for the frame.
-    PixelGrabber pg = new PixelGrabber(src, 0, 0, -1, -1, false);
     try {
-      pg.grabPixels();
+      int left = 0;
+      int right = monoWidth - 1;
+      
+      // obtain the pixel array for the frame.
+      PixelGrabber pg = new PixelGrabber(src, 0, 0, -1, -1, false);
+      try {
+        pg.grabPixels();
+      }
+      catch(Exception ex) {
+        System.out.println(ex.getMessage());
+        ex.printStackTrace();
+      }
+      int pixWidth = pg.getWidth();
+      int pixHeight = pg.getHeight();
+      int[][] pixels = to2DIntArray((int[]) pg.getPixels(), pixWidth, pixHeight);
+      
+      // find the left border.
+      for(int x = 0; x < pixWidth; x++) {
+        for(int y = 0; y < pixHeight; y++) {
+          int pixel = pixels[x][y];
+          if(((pixel >> 24) & 0x000000FF) > 0) {
+            left = x;
+            x = pixWidth;
+            y = pixHeight;
+          }
+        }
+      }
+      
+      // find the right border.
+      for(int x = pixWidth-1; x >= 0; x--) {
+        for(int y = 0; y < pixHeight; y++) {
+          int pixel = pixels[x][y];
+          if(((pixel >> 24) & 0x000000FF) > 0) {
+            right = x;
+            x = -1;
+            y = pixHeight;
+          }
+        }
+      }
+      
+      return ImageEffects.crop(src, left, 0, right-left + 1, charHeight);
     }
     catch(Exception ex) {
+      // It is most likely we got here because our source image doesn't 
+      // actually exist and caused PixelGrabber to fail.
       System.out.println(ex.getMessage());
       ex.printStackTrace();
+      return src;
     }
-    int pixWidth = pg.getWidth();
-    int pixHeight = pg.getHeight();
-    int[][] pixels = to2DIntArray((int[]) pg.getPixels(), pixWidth, pixHeight);
-    
-    // find the left border.
-    for(int x = 0; x < pixWidth; x++) {
-      for(int y = 0; y < pixHeight; y++) {
-        int pixel = pixels[x][y];
-        if(((pixel >> 24) & 0x000000FF) > 0) {
-          left = x;
-          x = pixWidth;
-          y = pixHeight;
-        }
-      }
-    }
-    
-    // find the right border.
-    for(int x = pixWidth-1; x >= 0; x--) {
-      for(int y = 0; y < pixHeight; y++) {
-        int pixel = pixels[x][y];
-        if(((pixel >> 24) & 0x000000FF) > 0) {
-          right = x;
-          x = -1;
-          y = pixHeight;
-        }
-      }
-    }
-    
-    return ImageEffects.crop(src, left, 0, right-left + 1, charHeight);
   }
   
   
@@ -440,9 +450,111 @@ public class BlitteredFont {
   }
   
   
+  /**
+   * Applies line and word wrapping to a string of text so that it fits a maximum 
+   * horizontal width using this BlitteredFont. 
+   * @param src   The original string.
+   * @param w     The desired maximum width to fit src into.
+   * @return      src with wrapping applied.
+   */
+  public String lineWrap(String src, int w) {
+    if(w <= 0)
+      return src;
+    
+    String result = "";
+    
+    boolean firstLine = true;
+    
+    String[] lines = src.split("\n");
+    for(String line : lines) {
+      // replaces the new lines that were split out.
+      if(firstLine) {
+        firstLine = false;
+      }
+      else {
+        result += "\n";
+      }
+      
+      int cursorX = 0;
+      boolean firstWord = true;
+      String[] words = line.split(" ");
+      for(String word : words) {
+ 
+        if(firstWord) {
+          firstWord = false;
+          Pair<String, Integer> pair = wrapFirstWord(word, cursorX, w);
+          result += pair._1;
+          cursorX = pair._2;
+        }
+        else {
+          //cursorX += spaceWidth + hPadding;
+          //result += " ";
+          
+          int wordWidth = getDimensions(" " + word).width;
+          // We can fit the word onto this line.
+          if(cursorX + wordWidth <= w) {
+            result += " " + word;
+            cursorX += wordWidth;
+          }
+          // The word doesn't fit on this line. We'll just have to insert it as
+          // the first word on the next line.
+          else {
+            result += "\n";
+            
+            Pair<String, Integer> pair = wrapFirstWord(word, 0, w);
+            result += pair._1;
+            cursorX = pair._2;
+          }
+        }
+        
+      } // endfor words
+    } // endfor lines
+    
+    return result;
+  }
   
-  
-  
+  /** Helper method for inserting the first word of a line for lineWrap. */
+  protected Pair<String, Integer> wrapFirstWord(String word, int cursorX, int w) {
+    String result = "";
+    
+    char[] chars = word.toCharArray();
+    for(int i = 0; i < chars.length; i++) {
+      char c = chars[i];
+      
+      if(c == esc) {
+        int offset = handleEscSequence(chars, i);
+        for(int j = i; j <= i+offset; j++) {
+          result += chars[j];
+        }
+        i += offset;
+      }
+      else {
+        try {
+          if(isMonospaced) {
+            cursorX += monoWidth;
+          }
+          else {
+            cursorX += charWidth.get(c);
+          }
+          cursorX += hPadding;
+          
+          // line-wrap if the word is too long.
+          if(cursorX >= w) {
+            cursorX = 0;
+            result += "\n";
+          }
+          
+          result += c;
+        }
+        catch(Exception e) {
+          // We probably got here by trying to get the image for a 
+          // character not used as a key in images.
+        }
+      }
+      
+    }
+    return new Pair<String, Integer>(result, cursorX);
+  }
   
   
   /** 
@@ -482,4 +594,8 @@ public class BlitteredFont {
     return testString;
   }
 }
+
+
+
+
 
