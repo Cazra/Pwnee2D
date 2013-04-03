@@ -51,6 +51,9 @@ public abstract class Level {
    
    /** Convenient reference to the game's mouse. */
    public Mouse mouse;
+   
+   /** True iff this level has finished loading. */
+   public boolean hasLoaded = false;
 	
    /** Creates the level and calls its loadData method to load its resources, if any. */
 	public Level(GamePanel game, Level parent) {
@@ -60,6 +63,7 @@ public abstract class Level {
       this.mouse = game.mouse;
       
       loadData();
+      hasLoaded = true;
 	}
    
    
