@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="Pwnee" default="jars">
+<project name="Pwnee" default="all">
 	
 	
     <description>

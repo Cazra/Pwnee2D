@@ -48,10 +48,10 @@ You'll need the following tools to be able to compile and run Pwnee and its exam
 Building pwnee.jar from the source code:
 -------------------
 Open a command terminal in the "development" directory and enter the command
-"ant all"
+"ant"
 
-This will create the pwnee.jar in the "latest" directory and it will also create the API docs
-for Pwnee in the "docs" directory.
+This will create the pwnee.jar in the "latest" directory and it will also 
+create the Javadocs docs for Pwnee's classes in the "docs" directory.
 
 
 
@@ -69,14 +69,26 @@ Frequently Asked Questions:
 
 Q: Why is this game engine called "Pwnee"? 
 A: I already named my Javascript + Canvas game engine "Jage", so I couldn't also name 
-my Java game engine "Jage". I also like to make the non-bronies cringe. 
+my Java game engine "Jage". You mad, non-brony?  :)
 
 Q: Is "Pwnee" an acronym for something?
 A: Not really, but I guess it could mean something like 
 Programming With Nice Electric Equines.
 
+Q: Is this engine currently stable enough to use?
+A: Yes it is... mostly. Some parts are in flux, but I'll try not to make many
+drastic changes in case somepony else is using Pwnee for their project.
 
+Q: Is there documentation for the Pwnee classes?
+A: When you build Pwnee with the ant builder, the Javadocs for Pwnee will be 
+generated in the "docs" folder. The classes are also open-source, and I try 
+to document/comment them well. 
 
+Q: Do you have an tutorials/examples of how to use Pwnee?
+A: Yes, check out the "examples" folder. The "HelloWorld" tutorial will show
+you how to set up a very basic application using Pwnee.
 
+Don't see an answer to your question here or in the docs? Fire me an email at
+sllindberg21@students.tntech.edu
 
 
