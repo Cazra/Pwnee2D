@@ -5,7 +5,7 @@ README
  * 
  * Pwnee : A lightweight 2D game engine for Java
  * 
- * Copyright (c) 2012 by Stephen Lindberg (sllindberg21@students.tntech.edu)
+ * Copyright (c) 2013 by Stephen Lindberg (sllindberg21@students.tntech.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
