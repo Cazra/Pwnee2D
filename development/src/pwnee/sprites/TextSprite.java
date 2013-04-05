@@ -86,15 +86,17 @@ public class TextSprite extends Sprite {
    * @return        The paragraph's text.
    */
   public String setPara(int index) {
-    try {
-      text = paragraphs.get(index);
+    if(index >=0 && index < paragraphs.size()) {
+    //  text = paragraphs.get(index);
+    //  paraIndex = index;
       paraIndex = index;
+      setText(paragraphs.get(index));
     }
-    catch(Exception e) {
+    else {
       text = "Hello. I am ERROR.";
     }
     
-    lineWrap();
+    // lineWrap();
     
     return text;
   }
@@ -105,15 +107,16 @@ public class TextSprite extends Sprite {
    */
   public String nextPara() {
     paraIndex++;
+    setPara(paraIndex);
     
-    if(paraIndex < paragraphs.size()) {
-      text = paragraphs.get(paraIndex);
-    }
-    else {
-      text = "Hello. I am ERROR.";
-    }
-    
-    lineWrap();
+  //  if(paraIndex >=0 && paraIndex < paragraphs.size()) {
+  //    text = paragraphs.get(paraIndex);
+  //  }
+  //  else {
+  //    text = "Hello. I am ERROR.";
+  //  }
+  //  
+  //  lineWrap();
     
     return text;
   }
@@ -124,15 +127,16 @@ public class TextSprite extends Sprite {
    */
   public String prevPara() {
     paraIndex--;
+    setPara(paraIndex);
     
-    if(paraIndex >= 0) {
-      text = paragraphs.get(paraIndex);
-    }
-    else {
-      text = "Hello. I am ERROR.";
-    }
-    
-    lineWrap();
+  //  if(paraIndex >= 0) {
+  //    text = paragraphs.get(paraIndex);
+  //  }
+  //  else {
+  //    text = "Hello. I am ERROR.";
+  //  }
+  //  
+  //  lineWrap();
     
     return text;
   }
