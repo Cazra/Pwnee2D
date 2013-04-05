@@ -70,6 +70,54 @@ public class TextSprite extends Sprite {
       g.drawString(text, 0, 0);
   }
   
+
+  /** 
+   * Reads one big block of text to automatically create linewrapped paragraphs of. 
+   * New paragraphs can be explicitly made using '\n\n'.
+   * Otherwise, it will fill generate the paragraphs such that the number of
+   * lines shown at once doesn't exceed maxLines.
+   * @param src       The source wall of text.
+   * @param maxLines  Each paragraph shall not exceed this many lines.
+   * @return          The resulting paragraph list, for chaining.
+   */
+  public List<String> makeParagraphs(String src, int maxLines) {
+    String textTemp = text;
+    paragraphs.clear();
+    
+    String[] paras = src.split("\n\n");
+    for(String para : paras) {
+      // line-wrap this "paragraph"
+      text = para;
+      lineWrap();
+      para = text;
+      
+      String curPara = "";
+      int lineLen = para.indexOf('\n') + 1;
+      int numLines = 1;
+      
+      while(lineLen > 0) {
+        String line = para.substring(0, lineLen);
+        curPara += line;
+        numLines++;
+        
+        if(numLines > maxLines) {
+          paragraphs.add(curPara);
+          curPara = "";
+          numLines = 1;
+        }
+        
+        para = para.substring(lineLen);
+        lineLen = para.indexOf('\n') + 1;
+      }
+      paragraphs.add(curPara + para.substring(0));
+    }
+    
+    text = textTemp;
+    return paragraphs;
+  }
+  
+  
+  
   /** 
    * Appends a paragraph to the paragraph list. 
    * @param para  The paragraph being appended.

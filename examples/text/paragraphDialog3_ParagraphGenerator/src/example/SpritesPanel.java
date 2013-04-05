@@ -11,7 +11,7 @@ import pwnee.text.BlitteredFont;
 public class SpritesPanel extends GamePanel {
     
     public BlitteredFont font;
-    public PacedTextSprite2 textSprite;
+    public PacedTextSprite textSprite;
     public DiaBoxSprite diaBox;
     public SupmuwSprite supmuw;
     
@@ -32,7 +32,7 @@ public class SpritesPanel extends GamePanel {
         supmuw.loadImages(this.imgLoader);
         
         // load the TextSprite.
-        textSprite = new PacedTextSprite2(diaBox.x + 20, diaBox.y + 20, font, "herpity derp");
+        textSprite = new PacedTextSprite(diaBox.x + 20, diaBox.y + 20, font, "herpity derp");
         textSprite.slowness = 2;
         textSprite.maxWidth = 240;
         initTextSprite();
@@ -57,7 +57,7 @@ public class SpritesPanel extends GamePanel {
                         "make your writers' jobs easier!" +
                         "\n\n" + 
                         "Check out the initTextSprite method in SpritesPanel.java " +
-                        "and the makeParagraphs method in PacedTextSprite3.java " + 
+                        "and the makeParagraphs method in TextSprite.java " + 
                         "to see how this convenient feature is used. Perhaps, you " + 
                         "would like to play around with it a bit by changing the " + 
                         "maximum number of lines to display per paragraph?" + 
