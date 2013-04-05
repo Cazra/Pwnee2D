@@ -11,7 +11,7 @@ import pwnee.text.BlitteredFont;
 public class SpritesPanel extends GamePanel {
     
     public BlitteredFont font;
-    public TextSprite textSprite;
+    public PacedTextSprite2 textSprite;
     public DiaBoxSprite diaBox;
     public SupmuwSprite supmuw;
     
@@ -32,39 +32,54 @@ public class SpritesPanel extends GamePanel {
         supmuw.loadImages(this.imgLoader);
         
         // load the TextSprite.
-        textSprite = new TextSprite(diaBox.x + 20, diaBox.y + 20, font, "herpity derp");
+        textSprite = new PacedTextSprite2(diaBox.x + 20, diaBox.y + 20, font, "herpity derp");
+        textSprite.slowness = 2;
         textSprite.maxWidth = 240;
         initTextSprite();
     }
     
     
     protected void initTextSprite() {
-      textSprite.addPara("Hello! Press ENTER to advance the text.");
-      textSprite.addPara("Welcome to the paragraphed dialog text tutorial!");
-      textSprite.addPara("I am the Supmuw, a friendly monster from the Creator's game: Wumpus World.");
-      textSprite.addPara("You probably saw me in some of the other Pwnee2D game engine examples, ");
-      textSprite.addPara("but I've just been so busy before that I didn't have a chance to talk.");
-      textSprite.addPara("As you can see, the text in this dialog is rendered using a blittered font.");
-      textSprite.addPara("That means that instead of using a vector font like Arial or Times New Roman, ");
-      textSprite.addPara("we're using a custom bitmap font to display the characters in the text.");
-      textSprite.addPara("You might also notice that the TextSprite and BlitteredFont classes ");
-      textSprite.addPara("are smart enough to implement linewrapping!");
-      textSprite.addPara("That way you can confine dialogs like this to a small area without worrying");
-      textSprite.addPara("about it running outside the dialog box's image ");
-      textSprite.addPara("or words getting chopped up if they're at the end of a line!");
-      textSprite.addPara("Isn't that great?");
-      textSprite.addPara("I hope that you're finding the examples provided with Pwnee to be very helpful!");
-      textSprite.addPara("Have a great day, and be sure to check out the creator's game studio website and Deviant Art site!");
-      textSprite.addPara("Neonair Games:\n   http://www.neonairgames.net");
-      textSprite.addPara("Deviant Art:\n   http://cazra.deviantart.com");
-      textSprite.addPara("This concludes the paragraphDialog example.");
+      String dialog =   "Hello! Press ENTER to advance the text." + 
+                        "\n\n" + 
+                        "Welcome to the third paragraphed dialog tutorial!" +
+                        "In this tutorial, we have the same paced dialog " + 
+                        "from the second tutorial, but there is a new feature " + 
+                        "that has been added to our custom TextSprite class " + 
+                        "which makes it much easier for developers to automate " +
+                        "the creation of text dialog without having to worry about " + 
+                        "having too many lines shown at once in a single paragraph " + 
+                        "of dialog." +
+                        "\n\n" + 
+                        "This is done with the new makeParagraphs method in our " + 
+                        "custom TextSprite! This isn't really something the " +
+                        "players would notice at all, but it will definitely " + 
+                        "make your writers' jobs easier!" +
+                        "\n\n" + 
+                        "Check out the initTextSprite method in SpritesPanel.java " +
+                        "and the makeParagraphs method in PacedTextSprite3.java " + 
+                        "to see how this convenient feature is used. Perhaps, you " + 
+                        "would like to play around with it a bit by changing the " + 
+                        "maximum number of lines to display per paragraph?" + 
+                        "\n\n" + 
+                        "This concludes the paragraphDialog example.";
+      int maxLines = 3;
+      
+      textSprite.makeParagraphs(dialog, maxLines);
       textSprite.setPara(0);
     }
     
     public void logic() {
+      textSprite.advOne();
+      
       // advance the text by pressing ENTER.
       if(keyboard.justPressed(KeyEvent.VK_ENTER) && textSprite.paraIndex < textSprite.paragraphs.size()) {
-        textSprite.nextPara();
+        if(textSprite.curLength < textSprite.text.length()) {
+          textSprite.advAll();
+        }
+        else {
+          textSprite.nextPara();
+        }
       }
       
       // hide the text box when the dialog is over.

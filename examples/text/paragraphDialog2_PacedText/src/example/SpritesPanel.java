@@ -52,7 +52,6 @@ public class SpritesPanel extends GamePanel {
       textSprite.addPara("Trying changing its slowness in SpritesPanel.java's constructor to change how quickly (or slowly) text appears.");
       textSprite.addPara("Setting the slowness to 0 or lower will cause the text to appear all at once.");
       textSprite.addPara("This concludes the paragraphDialog example.");
-      textSprite.addPara("");
       textSprite.setPara(0);
     }
     
@@ -60,7 +59,7 @@ public class SpritesPanel extends GamePanel {
       textSprite.advOne();
       
       // advance the text by pressing ENTER.
-      if(keyboard.justPressed(KeyEvent.VK_ENTER) && textSprite.paraIndex < textSprite.paragraphs.size() - 1) {
+      if(keyboard.justPressed(KeyEvent.VK_ENTER) && textSprite.paraIndex < textSprite.paragraphs.size()) {
         if(textSprite.curLength < textSprite.text.length()) {
           textSprite.advAll();
         }
@@ -70,7 +69,7 @@ public class SpritesPanel extends GamePanel {
       }
       
       // hide the text box when the dialog is over.
-      if(textSprite.paraIndex == textSprite.paragraphs.size() - 1) {
+      if(textSprite.paraIndex == textSprite.paragraphs.size()) {
         textSprite.isVisible = false;
         diaBox.isVisible = false;
       }
