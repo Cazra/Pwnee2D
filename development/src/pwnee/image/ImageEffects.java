@@ -237,7 +237,48 @@ public class ImageEffects {
 	}
 	
 	
-	
+	/** 
+   * Composites the source image with a color, using the source image's 
+   * pixels' alpha components. That, is the color of the source image's pixels
+   * are adjusted towards the composited color by a certain amount.
+   * 
+   * This effect is similar to the addColor effect, except it is parametric 
+   * between srcImg's colors and color, and it is also much faster.
+   * If alpha is 0.0, srcImg will be drawn using its original colors. 
+   * If alpha is 1.0, then the shape of srcImg will be drawn with all
+   * its pixels set to color.
+   * @param srcImg    The source image.
+   * @param color     The color we are compositing with the source image.
+   * @param alpha     A parametric value in range [0.0, 1.0] that determines
+   *                  how much of the source image's colors or the composite
+                      color to determine the result pixels.
+   */
+  public static Image colorComposite(Image srcImg, Color color, double alpha) {
+    alpha = Math.max(0, Math.min(1, alpha));
+    int w = (int) srcImg.getWidth(null);
+    int h = (int) srcImg.getHeight(null);
+    
+    BufferedImage result = new BufferedImage(w,h, BufferedImage.TYPE_INT_ARGB);
+    BufferedImage overlay = new BufferedImage(w,h, BufferedImage.TYPE_INT_ARGB);
+    AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.DST_IN, (float) alpha);
+    
+    Graphics2D g = overlay.createGraphics();
+    // clearing color is transparent.
+    g.setBackground(new Color(0x00000000, true));
+    
+    // draw our color and overlay the image on it using our AlphaComposite.
+    g.setColor(color);
+    g.fillRect(0, 0, w, h);
+    g.setComposite(ac);
+    g.drawImage(srcImg, 0, 0, null);
+    
+    // apply the overlay ontop of the source image.
+    g = result.createGraphics();
+    g.drawImage(srcImg, 0, 0, null);
+    g.drawImage(overlay, 0, 0, null);
+    
+    return result;
+  }
 	
 	
 }
