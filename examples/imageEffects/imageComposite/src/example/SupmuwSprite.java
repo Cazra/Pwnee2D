@@ -56,14 +56,17 @@ public class SupmuwSprite extends Sprite {
          // crop the source image to get the images for the individual animation frames.
          Image frame1 = ImageEffects.crop(srcImg, 1, 1, 24, 24);
          Image frame2 = ImageEffects.crop(srcImg, 27, 1, 24, 24);
+         Image frame3 = ImageEffects.crop(srcImg, 1, 27, 24, 24);
          
          // Add the cropped animation frames to our images map.
          images.put("dance1",frame1);
          images.put("dance2",frame2);
+         images.put("dead",frame3);         
          
          // Add our cropped images to the image loader and wait for them to finish loading.
          il.addImage(frame1);
          il.addImage(frame2);
+         il.addImage(frame3);
          il.waitForAll();
     }
     
@@ -133,7 +136,7 @@ public class SupmuwSprite extends Sprite {
       Image flashedImg = curImg;
       
       if(flash > 0.05 && curImg != null) {
-        flashedImg = ImageEffects.colorComposite(curImg, new Color(0xFFFFFF), flash);
+        flashedImg = ImageEffects.imageComposite(curImg, images.get("dead"), flash);
       }
       
       // draw the current image for the Sprite at 0,0 relative to the Sprite's own World coordinates. That last paramater is not important. 

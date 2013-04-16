@@ -279,6 +279,46 @@ public class ImageEffects {
     
     return result;
   }
+  
+  
+  
+  /** 
+   * Composites the source image with another image, using the source image's 
+   * shape.
+   * 
+   * If alpha is 0.0, srcImg will be drawn using its original colors. 
+   * If alpha is 1.0, dstImg will be drawn in srcImg's shape.
+   * @param srcImg    The source image.
+   * @param dstImg    The overlaid image.
+   * @param alpha     A parametric value in range [0.0, 1.0] that determines
+   *                  how much of the source image's colors or the other image's
+   *                  colors to determine the result pixels.
+   */
+  public static Image imageComposite(Image srcImg, Image dstImg, double alpha) {
+    alpha = Math.max(0, Math.min(1, alpha));
+    int w = (int) srcImg.getWidth(null);
+    int h = (int) srcImg.getHeight(null);
+    
+    BufferedImage result = new BufferedImage(w,h, BufferedImage.TYPE_INT_ARGB);
+    BufferedImage overlay = new BufferedImage(w,h, BufferedImage.TYPE_INT_ARGB);
+    AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.DST_IN, (float) alpha);
+    
+    Graphics2D g = overlay.createGraphics();
+    // clearing color is transparent.
+    g.setBackground(new Color(0x00000000, true));
+    
+    // draw our color and overlay the image on it using our AlphaComposite.
+    g.drawImage(dstImg, 0, 0, null);
+    g.setComposite(ac);
+    g.drawImage(srcImg, 0, 0, null);
+    
+    // apply the overlay ontop of the source image.
+    g = result.createGraphics();
+    g.drawImage(srcImg, 0, 0, null);
+    g.drawImage(overlay, 0, 0, null);
+    
+    return result;
+  }
 	
 	
 }
