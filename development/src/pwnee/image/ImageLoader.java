@@ -53,7 +53,7 @@ public class ImageLoader {
 		this.reset();
 	}
    
-   /** Creates an ImageLoader used only for loading images from a file. This doesn't initialize a MediaTracker and is only used by this class's static methods. */
+   /** Creates an ImageLoader without specifying a rendering Component. */
    public ImageLoader() {
       this(new JPanel());
    }
