@@ -38,7 +38,7 @@ import pwnee.fileio.ObjectFileIO;
 public class ImageLibrary {
   
   /** A mapping of names to serialized images. */
-  HashMap<String, Image> images = new HashMap<>();
+  public HashMap<String, Image> images = new HashMap<>();
   
   public ImageLibrary() {
   }
