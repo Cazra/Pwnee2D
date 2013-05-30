@@ -29,7 +29,7 @@ package pwnee;
 ======================================================================*/
 
 import java.util.Random;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 
 /** A class with several static methods for performing various common mathematical computations. */
 public class GameMath {
@@ -155,7 +155,45 @@ public class GameMath {
 		
 		
 	}
-
+  
+  
+  
+  /** 
+   * Computes the point at which two infinitely stretching, 2D, straight 
+   * lines intersect. Returns null if the lines don't intersect. 
+   */
+  public static Point2D lineIntersection(Line2D line1, Line2D line2) {
+    
+    double pX = line1.getX1();
+    double pY = line1.getY1();
+    double qX = line1.getX2();
+    double qY = line1.getY2();
+    
+    double rX = line2.getX1();
+    double rY = line2.getY1();
+    double sX = line2.getX2();
+    double sY = line2.getY2();
+    
+    double pqx = pX - qX;
+    double pqy = pY - qY;
+    double sqx = sX - qX;
+    double rsy = rY - sY;
+    double rsx = rX - sX;
+    double sqy = sY - qY;
+    
+    double top    = sqx*pqy - pqx*sqy;
+    double bottom = pqx*rsy - rsx*pqy;
+    
+    if(bottom == 0) {
+      return null;
+    }
+    
+    double alpha = top/bottom;
+    double x = alpha * rX + (1-alpha)*sX;
+    double y = alpha * rY + (1-alpha)*sY;
+    
+    return new Point2D.Double(x,y);
+  }
 }
 
 
