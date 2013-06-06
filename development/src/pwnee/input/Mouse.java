@@ -126,6 +126,14 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
    private boolean wheelUpSinceLastFrame = false;
     
     
+   /** The current count of consecutive clicks. */
+   public int clickCount = 0;
+   
+   /** Whether or not a double-click was detected since the last frame. */
+   public boolean doubleClicked = false;
+   
+   private int clickCountSinceLastFrame = 0;
+    
     
     /** Creates the Mouse object and assigns it a Component to listen for events for. */
    public Mouse(Component publisher) {
@@ -214,6 +222,11 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 		
 		wheelDownSinceLastFrame = false;
 		wheelUpSinceLastFrame = false;
+    
+    // consecutive click count/double-clicking
+    clickCount = clickCountSinceLastFrame;
+    clickCountSinceLastFrame = 0;
+    doubleClicked = (clickCount == 2);
    }
    
    
@@ -222,7 +235,7 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
    // event handlers
    
    public void mouseClicked(MouseEvent e) {
-      // Do nothing
+      clickCountSinceLastFrame = e.getClickCount();
    }
    
    public void mouseEntered(MouseEvent e) {
