@@ -40,6 +40,12 @@ public class ImageLibrary {
   /** A mapping of names to serialized images. */
   public HashMap<String, Image> images = new HashMap<>();
   
+  /** Whether the image library loads asynchronously. */
+  public boolean isAsynchronous = false;;
+  
+  /** Whether the image library is busy loading (if it is asynchronous).*/
+  public boolean isLoading = false;
+  
   public ImageLibrary() {
   }
   

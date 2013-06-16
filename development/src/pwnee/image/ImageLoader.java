@@ -46,6 +46,17 @@ public class ImageLoader {
    
    /** This will pretty much always be your application's GamePanel class. */
 	private Component parent;
+  
+  /** Whether or not images should be loaded asynchronously. */
+  public boolean isAsynchronous = false;
+  
+  /** Whether or not the ImageLoader is busy loading images (if it is asynchronous). */
+  public boolean isLoading = false;
+  
+  /** Metric for displaying a loading bar for an asynchronous ImageLoader. */
+  public int progressMax = 0;
+  
+  public int progressValue = 0;
 	
    /** Creates an empty ImageLoader assigned to a rendering Component. */
 	public ImageLoader(Component parent) {
@@ -72,14 +83,43 @@ public class ImageLoader {
 	
    /** Forces the application to wait while the ImageLoader finishes loading all the Images currently assigned to it. Afterwards it empties itself.*/
 	public void waitForAll() {
-		try {
-			mt.waitForAll();	// wait for the filtered image to load before drawing anything.
-		}
-		catch ( InterruptedException e ) {
-         System.err.println("ImageLoader - failed to load an Image.");
-			Thread.currentThread().interrupt();
-		}
-		reset();
+    if(isAsynchronous) {
+      isLoading = true;
+      
+      try {
+        Thread imgLoaderThread = new Thread() {
+          public void run() {
+            progressMax = nextId;
+            progressValue = 0;
+            for(int i = 0; i < nextId; i++) {
+              try {
+                mt.waitForID(i);
+              }
+              catch (Exception e) {
+              }
+              progressValue = i;
+            }
+            
+            isLoading = false;
+            reset();
+          }
+        };
+      }
+      catch (Exception e) {
+        isLoading = false;
+        reset();
+      }
+    }
+    else {
+      try {
+        mt.waitForAll();
+      }
+      catch ( InterruptedException e ) {
+           System.err.println("ImageLoader - failed to load an Image.");
+        Thread.currentThread().interrupt();
+      }
+      reset();
+    }
 	}
 	
    
