@@ -27,14 +27,20 @@ public class Vector2D {
   }
   
   
-  /** Returns the angle in radians from this vector to another vector. */
+  /** Returns the angle in radians from this vector to another vector, between 0.0 and PI. */
   public double rangleTo(Vector2D other) {
     return Math.acos(this.dotProduct(other)/(this.length()*other.length()));
   }
   
-  /** Returns the angle in degrees from this vector to another vector. */
+  /** Returns the angle in degrees from this vector to another vector, between 0 and 180 degrees. */
   public double angleTo(Vector2D other) {
     return GameMath.r2d(rangleTo(other));
+  }
+  
+  
+  /** Returns the sum of two vectors. */
+  public Vector2D add(Vector2D other) {
+    return new Vector2D(this.dx + other.dx, this.dy + other.dy);
   }
   
   
@@ -73,6 +79,8 @@ public class Vector2D {
       
       System.out.println("length(v1) = " + v1.length());
       System.out.println("length(v2) = " + v2.length());
+      
+      System.out.println("sum(v1, v2) = " + v1.add(v2));
       
       System.out.println("dotProduct(v1, v2) = " + v1.dotProduct(v2));
       System.out.println("angle from v1 to v2: " + v1.angleTo(v2));
