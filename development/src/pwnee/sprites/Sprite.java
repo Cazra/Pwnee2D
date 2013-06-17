@@ -34,9 +34,12 @@ import java.awt.image.*;
 import java.util.ArrayList;
 
 import pwnee.GameMath;
+import pwnee.geom.*;
 
 /** 
- * An abstract class used to represent some sort of renderable object.
+ * An abstract class used to represent some sort of renderable object. 
+ * It has a position, dimensions, scale and rotate transforms, opacity, 
+ * and some other neat and flexible features. 
  */
 public abstract class Sprite {
 
@@ -89,7 +92,11 @@ public abstract class Sprite {
    /** If this is false, then the Sprite won't be rendered. */
 	public boolean isVisible = true;
 	
-	/** Controls how opaque or transparent this Sprite is. The value for this should be in the range [0.0, 1.0], where 0.0 is completely transparent and 1.0 is completely opaque. */
+	/** 
+   * Controls how opaque or transparent this Sprite is. The value for this 
+   * should be in the range [0.0, 1.0], where 0.0 is completely transparent 
+   * and 1.0 is completely opaque. 
+   */
    public double opacity = 1.0;
 	
    /** A convenient array of doubles that can be used for whatever. */
@@ -115,7 +122,10 @@ public abstract class Sprite {
       }
 	}
 	
-	/** Marks this Sprite as destroyed. You may also want to override this method to do additional processing when this Sprite is destroyed.*/
+	/** 
+   * Marks this Sprite as destroyed. You may also want to override this method 
+   * to do additional processing when this Sprite is destroyed.
+   */
 	public void destroy() {
 		this.isDestroyed = true;
 	}
@@ -124,7 +134,8 @@ public abstract class Sprite {
 	// RENDERING METHODS
 	
 	/**
-	 * Updates the transforms for drawing the Sprite if needed and then calls the Sprite's draw method.
+	 * Updates the transforms for drawing the Sprite if needed and then calls 
+   * the Sprite's draw method. 
 	 * @param g		The graphics context this is being rendered on.
 	 */
 	public void render(Graphics2D g) {
@@ -157,7 +168,7 @@ public abstract class Sprite {
 		g.setTransform(oldTrans);
 		g.setComposite(oldComp);
         
-        this.curTrans = curTrans;
+    this.curTrans = curTrans;
 	}
 	
 	/**	
@@ -206,8 +217,20 @@ public abstract class Sprite {
 	
 	//////////////////// COLLISION METHODS
 	
+  
+  /** 
+   * Returns the dimensions of the sprite's bounding box. 
+   * Override this to suit your sprite's needs.
+   */
+  public Dimension2D getDimensions() {
+    return new DimensionDouble( width*scaleX, height*scaleY);
+  }  
+  
 	
-	/** Returns the bounding box of the Sprite as a Rectangle2D object. */
+	/** 
+   * Returns the bounding box of the Sprite as a Rectangle2D object. 
+   * Override this to suit your sprite's needs.
+   */
 	public Rectangle2D getCollisionBox() {	
 		return new Rectangle2D.Double(x-focalX*scaleX, y-focalY*scaleY, width*scaleX, height*scaleY);
 	}
