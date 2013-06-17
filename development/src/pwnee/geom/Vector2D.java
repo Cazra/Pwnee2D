@@ -37,6 +37,19 @@ public class Vector2D {
     return GameMath.r2d(rangleTo(other));
   }
   
+  /** 
+   * Returns the signed angle in degrees from this vector to another vector. 
+   * This assumes we are working in game geometry where the positive y-axis
+   * points down.
+   * This would need to be rotated by the returned amount to become parallel
+   * with other.
+   */
+  public double angleToS(Vector2D other) {
+    double v1A = GameMath.angleTo(0, 0, this.dx, this.dy);
+    double v2A = GameMath.angleTo(0, 0, other.dx, other.dy);
+    
+    return v1A - v2A;
+  }
   
   /** Returns the sum of two vectors. */
   public Vector2D add(Vector2D other) {
@@ -83,9 +96,10 @@ public class Vector2D {
       System.out.println("sum(v1, v2) = " + v1.add(v2));
       
       System.out.println("dotProduct(v1, v2) = " + v1.dotProduct(v2));
-      System.out.println("angle from v1 to v2: " + v1.angleTo(v2));
+      System.out.println("unsigned angle from v1 to v2: " + v1.angleTo(v2));
+      System.out.println("signed angle from v1 to v2: " + v1.angleToS(v2));
       
-      // performance test
+      // performance test: compute the angles between many vectors.
       int testSize = 10;
       int totalVectors = testSize*testSize*testSize*testSize;
       System.out.println("Doing performance test on " + totalVectors + " vectors.");
@@ -99,7 +113,6 @@ public class Vector2D {
               v1 = new Vector2D(x1, y1);
               v2 = new Vector2D(x2, y2);
               
-              v1.dotProduct(v2);
               v1.angleTo(v2);
               
             }
