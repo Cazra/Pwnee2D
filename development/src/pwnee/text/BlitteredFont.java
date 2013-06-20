@@ -150,13 +150,20 @@ public class BlitteredFont {
       
       // obtain the pixel array for the frame.
       PixelGrabber pg = new PixelGrabber(src, 0, 0, -1, -1, false);
-      try {
-        pg.grabPixels();
+      boolean pgSuccess = false;
+      while(!pgSuccess) {
+        try {
+          pg.grabPixels();
+          pgSuccess = true;
+        }
+        catch(Exception ex) {
+          System.out.println("PixelGrabber failed. " + ex.getMessage());
+          pg = new PixelGrabber(src, 0, 0, -1, -1, false);
+          Thread.sleep(1);
+          //ex.printStackTrace();
+        }
       }
-      catch(Exception ex) {
-        System.out.println(ex.getMessage());
-        ex.printStackTrace();
-      }
+      
       int pixWidth = pg.getWidth();
       int pixHeight = pg.getHeight();
       int[][] pixels = to2DIntArray((int[]) pg.getPixels(), pixWidth, pixHeight);

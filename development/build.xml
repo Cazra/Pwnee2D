@@ -79,11 +79,13 @@ bin, lib, and other folders.</echo>
 	
 	<!-- Compile all the Java code that is out of date. -->
 	<target name="compile" depends="init"
-		description="Compile all JAva code.">
+		description="Compile all Java code.">
 		<mkdir dir="${build.bin}"/>
 		<javac
 			destdir		="${build.bin}"
-			classpathref="build.classpath">
+			classpathref="build.classpath"
+      debug="on" 
+      debuglevel="lines,vars,source">
 			<src path="${build.src}"/>
 		</javac>
     </target>

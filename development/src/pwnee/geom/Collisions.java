@@ -63,7 +63,7 @@ public class Collisions {
    * Test for a collision between two convex polygons. Assume that the points 
    * are given in clockwise order (with positive y pointing down). 
    */
-  public static boolean poly2poly(double[] x1s, double[] y1s, double[] x2s, double[] y2s) {
+  public static boolean convex2convex(double[] x1s, double[] y1s, double[] x2s, double[] y2s) {
     if(x1s.length != y1s.length || x2s.length != y2s.length) {
       return false;
     }
@@ -86,6 +86,7 @@ public class Collisions {
       double y = y1s[i];
       
       boolean underAll = true;
+      boolean aboveAll = true; // The point will be "above" all the segments if the vertices were specified in ccw order. 
       for(int j = 0; j < x2s.length; j++) {
         double sx = x2s[j];
         double sy = y2s[j];
@@ -93,14 +94,20 @@ public class Collisions {
         double ex = x2s[(j+1) % x2s.length];
         double ey = y2s[(j+1) % x2s.length];
         
-        // Skip to next point if above a segment.
-        if(Line2D.relativeCCW(sx, sy, ex, ey, x, y) > 0) {
+        // Skip to next point if it can be neither below or above all the segments.
+        int relCCW = Line2D.relativeCCW(sx, sy, ex, ey, x, y);
+        if(relCCW > 0) {
           underAll = false;
+        }
+        if(relCCW < 0) {
+          aboveAll = false;
+        }
+        if(!underAll && !aboveAll) {
           break;
         }
       }
       
-      if(underAll) {
+      if(underAll || aboveAll) {
         return true;
       }
     }
@@ -109,24 +116,43 @@ public class Collisions {
   }
   
   
+  /** Unit test for convex polygon collision. */
   public static void testPoly() {
-    {
+    { // true
       double[] x1s = {1, 0, -1, 0};
       double[] y1s = {0, 1, 0, -1};
       
       double[] x2s = {0, 0, 2, 2};
       double[] y2s = {0, 2, 2, 0};
       
-      System.out.println(poly2poly(x1s, y1s, x2s, y2s));
+      System.out.println(convex2convex(x1s, y1s, x2s, y2s));
     }
-    {
+    { // true
       double[] x1s = {1, 0, -1, 0};
       double[] y1s = {0, -1, 0, 1};
       
       double[] x2s = {0, 0, 2, 2};
       double[] y2s = {0, 2, 2, 0};
       
-      System.out.println(poly2poly(x1s, y1s, x2s, y2s));
+      System.out.println(convex2convex(x1s, y1s, x2s, y2s));
+    }
+    { // false
+      double[] x1s = {1, 0, -1, 0};
+      double[] y1s = {0, -1, 0, 1};
+      
+      double[] x2s = {1.5, 1.5, 2, 2};
+      double[] y2s = {0, 2, 2, 0};
+      
+      System.out.println(convex2convex(x1s, y1s, x2s, y2s));
+    }
+    { // true, barely
+      double[] x1s = {1, 0, -1, 0};
+      double[] y1s = {0, -1, 0, 1};
+      
+      double[] x2s = {1, 1.5, 2, 2};
+      double[] y2s = {0, 2, 2, 0};
+      
+      System.out.println(convex2convex(x1s, y1s, x2s, y2s));
     }
   }
   
