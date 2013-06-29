@@ -207,7 +207,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
       }
     }
     else {
-      newLevel = toLevel;
+      curLevel = toLevel;
     }
 
     changeToLevelName = "";
