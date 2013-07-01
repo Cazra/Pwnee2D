@@ -68,12 +68,12 @@ Frequently Asked Questions:
 ----------------
 
 Q: Why is this game engine called "Pwnee"? 
-A: I already named my Javascript + Canvas game engine "Jage", so I couldn't also name 
-my Java game engine "Jage". You mad, non-brony?  :)
+A: It's lightweight, but powerful. It doesn't have quite the horsepower that 
+   heavier Java game engines have, but it sure pwns! 
 
-Q: Is "Pwnee" an acronym for something?
-A: Not really, but I guess it could mean something like 
-Programming With Nice Electric Equines.
+Q: How do you pronounce "Pwnee"?
+A: It's pronounced "poh-nee", just like how you pronounce 
+   "vertically-challenged, magic, colorful equines".
 
 Q: Is this engine currently stable enough to use?
 A: Yes it is... mostly. Some parts are in flux, but I'll try not to make many

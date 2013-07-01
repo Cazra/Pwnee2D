@@ -82,6 +82,11 @@ public abstract class GamePanel extends JPanel implements ActionListener {
 
   /** The Level we are changing to if changingLevel is true. */
   public Level toLevel = null;
+  
+  
+  /** Whether the game is hard-paused. If true, skip logic(). */
+  public boolean isPaused = false;
+  
    
   /** Initializes the GamePanel and its components. */
   public GamePanel() {
@@ -111,7 +116,9 @@ public abstract class GamePanel extends JPanel implements ActionListener {
         // Run n iterations through our game's logic (most of the time, this will be 1.)
         // Then perform 1 rendering iteration.
         for(int i =0; i < stepsPerFrame; i++) {
-          this.logic();
+          if(!isPaused) {
+            this.logic();
+          }
         }
         this.repaint();
      
