@@ -251,25 +251,26 @@ public abstract class Sprite {
     double bottom = top + height*scaleY;
     
     // define the rectangle's points in clockwise order (in game coordinates, y axis is down).
-    Point2D p1 = new Point2D.Double(left, top);
-    Point2D p2 = new Point2D.Double(right, top);
-    Point2D p3 = new Point2D.Double(right, bottom);
-    Point2D p4 = new Point2D.Double(left, bottom);
+    Point2D[] p = new Point2D[4];
+    p[0] = new Point2D.Double(left, top);
+    p[1] = new Point2D.Double(right, top);
+    p[2] = new Point2D.Double(right, bottom);
+    p[3] = new Point2D.Double(left, bottom);
     
     double[] x = new double[4];
     double[] y = new double[4];
     
-    x[0] = p1.getX();
-    y[0] = p1.getY();
-    
-    x[1] = p2.getX();
-    y[1] = p2.getY();
-    
-    x[2] = p3.getX();
-    y[2] = p3.getY();
-    
-    x[3] = p4.getX();
-    y[3] = p4.getY();
+    for(int i = 0; i < 4; i++) {
+      // rotate, then translate the point.
+      AffineTransform transform = AffineTransform.getTranslateInstance(this.x, this.y);
+      transform.rotate(0-GameMath.d2r(angle));
+      
+      p[i] = transform.transform(p[i], null);
+      
+      
+      x[i] = p[i].getX();
+      y[i] = p[i].getY();
+    }
     
     return new Polygon2D(x, y);
   } 
