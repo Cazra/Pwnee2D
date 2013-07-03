@@ -234,6 +234,45 @@ public abstract class Sprite {
 	public Rectangle2D getCollisionBox() {	
 		return new Rectangle2D.Double(x-focalX*scaleX, y-focalY*scaleY, width*scaleX, height*scaleY);
 	}
+  
+  
+  /** 
+   * Returns the sprite's bounding convex polygon used for Separating Axis Theorem collision tests. 
+   * The default implementation returns a the boundind rectangle, with transforms. 
+   * Override this to suit your sprite's needs.
+   */
+  public Polygon2D getCollisionPoly() {
+    double scaleX = this.scaleX*scaleUni;
+    double scaleY = this.scaleY*scaleUni;
+    
+    double left = -focalX*scaleX;
+    double top = -focalY*scaleY;
+    double right = left + width*scaleX;
+    double bottom = top + height*scaleY;
+    
+    // define the rectangle's points in clockwise order (in game coordinates, y axis is down).
+    Point2D p1 = new Point2D.Double(left, top);
+    Point2D p2 = new Point2D.Double(right, top);
+    Point2D p3 = new Point2D.Double(right, bottom);
+    Point2D p4 = new Point2D.Double(left, bottom);
+    
+    double[] x = new double[4];
+    double[] y = new double[4];
+    
+    x[0] = p1.getX();
+    y[0] = p1.getY();
+    
+    x[1] = p2.getX();
+    y[1] = p2.getY();
+    
+    x[2] = p3.getX();
+    y[2] = p3.getY();
+    
+    x[3] = p4.getX();
+    y[3] = p4.getY();
+    
+    return new Polygon2D(x, y);
+  } 
    
    /**
    * Tests if this sprite is colliding with some other sprite. 

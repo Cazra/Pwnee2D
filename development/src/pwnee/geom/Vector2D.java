@@ -1,5 +1,8 @@
 package pwnee.geom;
 
+import java.awt.*;
+import java.awt.geom.*;
+
 import pwnee.GameMath;
 
 /** A geometric 2D vector, not a fancy array. */
@@ -71,6 +74,23 @@ public class Vector2D {
       return false;
     }
   }
+  
+  
+  /** 
+   * Draws the vector for testing purposes. 
+   * It is represented as a line with a circle at the start point. 
+   */
+  public void draw(Graphics2D g, double x, double y) {
+    Shape shape = new Line2D.Double(x, y, x + dx, y + dy);
+    g.draw(shape);
+    shape = new Ellipse2D.Double(x-1, y-1, 2, 2);
+    g.draw(shape);
+  }
+  
+  public void draw(Graphics2D g) {
+    draw(g, 0, 0);
+  }
+  
   
   /** 
    * Unit test takes 4 doubles as arguments to define 2 vectors. 
