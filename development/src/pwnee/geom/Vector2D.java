@@ -19,6 +19,10 @@ public class Vector2D {
     this.dy = dy;
   }
   
+  
+  //////// vector math
+  
+  
   /** Returns the magnitude of this vector. */
   public double length() {
     return GameMath.dist(0, 0, dx, dy);
@@ -58,6 +62,46 @@ public class Vector2D {
   public Vector2D add(Vector2D other) {
     return new Vector2D(this.dx + other.dx, this.dy + other.dy);
   }
+  
+  
+  /** Scales the dx and dy component by the same amount. */
+  public Vector2D scale(double amt) {
+    return new Vector2D(this.dx*amt, this.dy*amt);
+  }
+  
+  /** Scales the dx and dy components by differing amounts. */
+  public Vector2D scale(double scaleX, double scaleY) {
+    return new Vector2D(this.dx*scaleX, this.dy*scaleY);
+  }
+  
+  
+  /** Rotates the vector counter-clockwise (in game geometry) by the specified number of degrees. */
+  public Vector2D rotate(double angle) {
+    return rrotate(GameMath.d2r(angle));
+  }
+  
+  /** Rotates the vector counter-clockwise (in game geometry) by the specified number of radians. */
+  public Vector2D rrotate(double angle) {
+    AffineTransform trans = AffineTransform.getRotateInstance(0-angle);
+    Point2D pt = new Point2D.Double(dx, dy);
+    pt = trans.transform(pt, null);
+    
+    return new Vector2D(pt.getX(), pt.getY());
+  }
+  
+  
+  /** Applies an affine transform to the vector. */
+  public Vector2D transform(AffineTransform trans) {
+    Point2D start = new Point2D.Double(0, 0);
+    Point2D end = new Point2D.Double(dx, dy);
+    
+    start = trans.transform(start, null);
+    end = trans.transform(end, null);
+    
+    return new Vector2D(end.getX() - start.getX(), end.getY() - start.getY());
+  }
+  
+  //////// Misc
   
   
   public String toString() {
