@@ -23,6 +23,10 @@ public class Polygon2D {
     }
   }
   
+  
+  //////// Model
+  
+  
   /** Returns the number of vertices in this polygon. */
   public int getNumPoints() {
     return x.length;
@@ -37,6 +41,10 @@ public class Polygon2D {
       return new Point2D.Double(x[index], y[index]);
     }
   }
+  
+  
+  
+  //////// Collisions
   
   
   /** Returns true iff this polygon is convex and it contains the specified point. */
@@ -101,6 +109,73 @@ public class Polygon2D {
     return false;
   }
   
+  
+  //////// Geometry 
+  
+  /** Translates the polygon. */
+  public Polygon2D translate(double dx, double dy) {
+    int numPts = getNumPoints();
+    double[] newX = new double[numPts];
+    double[] newY = new double[numPts];
+    
+    for(int i = 0; i < numPts; i++) {
+      newX[i] = x[i] + dx;
+      newY[i] = y[i] + dy;
+    }
+    
+    return new Polygon2D(newX, newY);
+  }
+  
+  
+  /** Scales the polygon differently along the x and y axes. */
+  public Polygon2D scale(double scaleX, double scaleY) {
+    int numPts = getNumPoints();
+    double[] newX = new double[numPts];
+    double[] newY = new double[numPts];
+    
+    for(int i = 0; i < numPts; i++) {
+      newX[i] = x[i]*scaleX;
+      newY[i] = y[i]*scaleY;
+    }
+    
+    return new Polygon2D(newX, newY);
+  }
+  
+  /** Scales the polygon uniformly along the x and y axes. */
+  public Polygon2D scale(double amt) {
+    return scale(amt, amt);
+  }
+  
+  
+  /** Rotates the polygon counter-clockwise (in game geometry) by the specified number of degrees. */
+  public Polygon2D rotate(double angle) {
+    return transform(AffineTransform.getRotateInstance(0-GameMath.d2r(angle)));
+  }
+  
+  
+  /** Rotates the polygon counter-clockwise (in game geometry) by the specified number of radians. */
+  public Polygon2D rrotate(double angle) {
+    return transform(AffineTransform.getRotateInstance(0-angle));
+  }
+  
+  
+  /** Applies an affine transform to this polygon. */
+  public Polygon2D transform(AffineTransform trans) {
+    int numPts = getNumPoints();
+    double[] newX = new double[numPts];
+    double[] newY = new double[numPts];
+    
+    for(int i = 0; i < numPts; i++) {
+      Point2D pt = trans.transform(new Point2D.Double(x[i], y[i]), null);
+      newX[i] = pt.getX();
+      newY[i] = pt.getY();
+    }
+    
+    return new Polygon2D(newX, newY);
+  }
+  
+  
+  //////// Misc.
   
   
   /** Draws the polygon. */
