@@ -92,12 +92,18 @@ public class Polygon2D {
   
   /** Tests if this and another convex polygon are intersecting using the Separating Axis Theorem. */
   public boolean intersects(Polygon2D other) {
-    return (this.halfSAT(other) || other.halfSAT(this));
+    // There is only a collision if no separating axis could be found.
+    return !(this.halfSAT(other) || other.halfSAT(this));
   }
   
   
-  /** Tests if at least one of this polygon's vertices are inside another polygon. */
+  /** 
+   * Return true if there is a tangent line on one of this poly's segments 
+   * such that that line separates all the points of both polygons.
+   * Right now this only works if the points are specified in clockwise order (in game geometry).
+   */
   private boolean halfSAT(Polygon2D other) {
+    /*
     for(int i = 0; i < getNumPoints(); i++) {
       double xx = x[i];
       double yy = y[i];
@@ -106,6 +112,34 @@ public class Polygon2D {
         return true;
       }
     }
+    return false;
+    */
+    
+    // All the points in the other polygon will be "above" all the segments if the vertices were specified in ccw order. 
+    int numPoints = getNumPoints();
+    for(int j = 0; j < numPoints; j++) {
+      // segment start and end points.
+      double sx = this.x[j];
+      double sy = this.y[j];
+      double ex = this.x[(j+1) % numPoints];
+      double ey = this.y[(j+1) % numPoints];
+      
+      // return false early if there is a separating axis.
+      boolean sepAxis = true;
+      for(int i = 0; i < other.getNumPoints(); i++) {
+        Point2D pt = other.getPoint(i);
+        int relCCW = Line2D.relativeCCW(sx, sy, ex, ey, pt.getX(), pt.getY());
+        if(relCCW < 0) {
+          sepAxis = false;
+          break;
+        }
+      }
+      if(sepAxis) {
+        return true;
+      }
+      
+    }
+    
     return false;
   }
   
