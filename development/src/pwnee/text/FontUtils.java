@@ -6,12 +6,6 @@ import java.awt.geom.*;
 /** Does text rendering calculations for a given font. */
 public class FontUtils {
   
-  public static int ALIGN_LEFT = 0;
-  
-  public static int ALIGN_CENTER = 1;
-  
-  public static int ALIGN_RIGHT = 2;
-  
   public Font font;
   
   private FontMetrics fm;
@@ -85,34 +79,6 @@ public class FontUtils {
       
       g.drawString(line, 0, height);
     }
-  }
-  
-  
-  /** Draws a simple tooltip, a short string of text inside a filled rectangle. */
-  public static void drawToolTip(Graphics2D g, String str, int alignHint, Color strokeColor, Color fillColor) {
-    AffineTransform origTrans = g.getTransform();
-    
-    Dimension2D dims = getStringDimensions(str, g.getFont(), 1);
-    Rectangle2D rect = new Rectangle2D.Double(0, 0, dims.getWidth()+10, dims.getHeight()+10);
-    
-    double offset = 0;
-    if(alignHint == ALIGN_CENTER) {
-      offset = rect.getWidth()/2;
-    }
-    if(alignHint == ALIGN_RIGHT) {
-      offset = rect.getWidth();
-    }
-    g.translate(0-offset, 0);
-    
-    g.setColor(fillColor);
-    g.fill(rect);
-    g.setColor(strokeColor);
-    g.draw(rect);
-    
-    g.translate(5, 2);
-    drawString(g, str, 1);
-    
-    g.setTransform(origTrans);
   }
   
   
