@@ -11,6 +11,7 @@ public class Polygon2D {
   private double[] x;
   private double[] y;
   
+  /** Creates a polygon by copying from two arrays of x and y coordinates. */
   public Polygon2D(double[] xpoints, double[] ypoints) {
     int npoints = Math.min(xpoints.length, ypoints.length);
     
@@ -20,6 +21,19 @@ public class Polygon2D {
     for(int i = 0; i < npoints; i++) {
       x[i] = xpoints[i];
       y[i] = ypoints[i];
+    }
+  }
+  
+  /** Creates a polygon by copying coordinate data from an array of points. */
+  public Polygon2D(Point2D[] p) {
+    int numPts = p.length;
+    
+    x = new double[numPts];
+    y = new double[numPts];
+    
+    for(int i = 0; i < numPts; i++) {
+      x[i] = p[i].getX();
+      y[i] = p[i].getY();
     }
   }
   
@@ -208,6 +222,73 @@ public class Polygon2D {
     return new Polygon2D(newX, newY);
   }
   
+  
+  
+  
+  /** Convert a Rectangle2D into a Polygon2D. */
+  public static Polygon2D rectToPoly(Rectangle2D rect) {
+    double left = rect.getX();
+    double top = rect.getY();
+    double right = left + rect.getWidth();
+    double bottom = top + rect.getHeight();
+    
+    int numPts = 4;
+    
+    // define the rectangle's points in clockwise order (in game coordinates, y axis is down).
+    Point2D[] p = new Point2D[numPts];
+    p[0] = new Point2D.Double(left, top);
+    p[1] = new Point2D.Double(right, top);
+    p[2] = new Point2D.Double(right, bottom);
+    p[3] = new Point2D.Double(left, bottom);
+    return new Polygon2D(p);
+  }
+  
+  
+  /** Convert an equilateral octogon defined by a rectangle into a Polygon2D. */
+  public static Polygon2D octToPoly(Rectangle2D oct) {
+    double left = oct.getX();
+    double top = oct.getY();
+    double right = left + oct.getWidth();
+    double bottom = top + oct.getHeight();
+    
+    double cornerMult = 1/2.8284; // 1/(2*sqrt(2)) approx.
+    double cornerW = cornerMult * oct.getWidth();
+    double cornerH = cornerMult * oct.getHeight();
+    
+    int numPts = 8;
+    
+    // define the rectangle's points in clockwise order (in game coordinates, y axis is down).
+    Point2D[] p = new Point2D[numPts];
+    p[0] = new Point2D.Double(left + cornerW, top);
+    p[1] = new Point2D.Double(right - cornerW, top);
+    p[2] = new Point2D.Double(right, top + cornerH);
+    p[3] = new Point2D.Double(right, bottom - cornerH);
+    p[4] = new Point2D.Double(right - cornerW, bottom);
+    p[5] = new Point2D.Double(left + cornerW, bottom);
+    p[6] = new Point2D.Double(left, bottom - cornerH);
+    p[7] = new Point2D.Double(left, top + cornerH);
+    return new Polygon2D(p);
+  }
+  
+  
+  /** Convert an approximation of an ellipse, given a number of sides and its bounding rectangle, into a Polygon2D. */
+  public static Polygon2D ellipseToPoly(Rectangle2D ellipseBounds, int sides) {
+    double radW = ellipseBounds.getWidth()/2;
+    double radH = ellipseBounds.getHeight()/2;
+    
+    double centerX = ellipseBounds.getX() + radW;
+    double centerY = ellipseBounds.getY() + radH;
+    
+    Point2D[] p = new Point2D[sides];
+    double angle = 90; // I picked 90 so that it is symetrical down its vertical center. 
+    for(int i = 0; i < sides; i++) {
+      double x = centerX + GameMath.cos(angle) * radW;
+      double y = centerY - GameMath.sin(angle) * radH;
+      
+      p[i] = new Point2D.Double(x, y);
+    }
+    return new Polygon2D(p);
+  }
   
   //////// Misc.
   
