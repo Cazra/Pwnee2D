@@ -2,6 +2,9 @@ package pwnee.geom;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 import pwnee.GameMath;
 
@@ -40,30 +43,34 @@ public class Polygon2D {
   
   //////// Model
   
-  
   /** Returns the number of vertices in this polygon. */
-  public int getNumPoints() {
+  public int size() {
     return x.length;
   }
   
   
   public Point2D getPoint(int index) {
-    if(index < 0 || index >= getNumPoints()) {
-      return null;
-    }
-    else {
-      return new Point2D.Double(x[index], y[index]);
-    }
+    index = nIndex(index);
+    return new Point2D.Double(x[index], y[index]);
   }
   
   
+  public List<Point2D> getPoints() {
+    List<Point2D> points = new ArrayList<>();
+    
+    for(int i=0; i < x.length; i++) {
+      points.add(new Point2D.Double(x[i], y[i]));
+    }
+    
+    return points;
+  }
   
   //////// Collisions
   
   
   /** Returns true iff this polygon is convex and it contains the specified point. */
   public boolean contains(double x, double y) {
-    int numPoints = getNumPoints();
+    int numPoints = size();
     
     // The point will be "below" all the segments if the vertices were specified in cw order.
     boolean underAll = true; 
@@ -118,7 +125,7 @@ public class Polygon2D {
    */
   private boolean halfSAT(Polygon2D other) {
     /*
-    for(int i = 0; i < getNumPoints(); i++) {
+    for(int i = 0; i < size(); i++) {
       double xx = x[i];
       double yy = y[i];
       
@@ -130,7 +137,7 @@ public class Polygon2D {
     */
     
     // All the points in the other polygon will be "above" all the segments if the vertices were specified in ccw order. 
-    int numPoints = getNumPoints();
+    int numPoints = size();
     for(int j = 0; j < numPoints; j++) {
       // segment start and end points.
       double sx = this.x[j];
@@ -140,7 +147,7 @@ public class Polygon2D {
       
       // return false early if there is a separating axis.
       boolean sepAxis = true;
-      for(int i = 0; i < other.getNumPoints(); i++) {
+      for(int i = 0; i < other.size(); i++) {
         Point2D pt = other.getPoint(i);
         int relCCW = Line2D.relativeCCW(sx, sy, ex, ey, pt.getX(), pt.getY());
         if(relCCW < 0) {
@@ -162,7 +169,7 @@ public class Polygon2D {
   
   /** Translates the polygon. */
   public Polygon2D translate(double dx, double dy) {
-    int numPts = getNumPoints();
+    int numPts = size();
     double[] newX = new double[numPts];
     double[] newY = new double[numPts];
     
@@ -177,7 +184,7 @@ public class Polygon2D {
   
   /** Scales the polygon differently along the x and y axes. */
   public Polygon2D scale(double scaleX, double scaleY) {
-    int numPts = getNumPoints();
+    int numPts = size();
     double[] newX = new double[numPts];
     double[] newY = new double[numPts];
     
@@ -209,7 +216,7 @@ public class Polygon2D {
   
   /** Applies an affine transform to this polygon. */
   public Polygon2D transform(AffineTransform trans) {
-    int numPts = getNumPoints();
+    int numPts = size();
     double[] newX = new double[numPts];
     double[] newY = new double[numPts];
     
@@ -289,13 +296,57 @@ public class Polygon2D {
     }
     return new Polygon2D(p);
   }
+
+  
+  
+  /** 
+   * Splits a polygon into two polygons given two vertex indices to form a 
+   * splitting segment between.
+   */
+  public Polygon2D[] splitPoly(int i1, int i2) {
+    Polygon2D[] result = new Polygon2D[2];
+    
+    while(i2 < i1) {
+      i2 += size();
+    }
+    
+    int size0 = i2-i1 + 1;
+    int size1 = size() - size0 + 2;
+    
+    Point2D[] p0 = new Point2D[size0];
+    Point2D[] p1 = new Point2D[size1];
+    
+    for(int i = 0; i < size0; i++) {
+      p0[i] = getPoint(i1 + i);
+    }
+    
+    for(int i = 0; i < size1; i++) {
+      p1[i] = getPoint(i2+i);
+    }
+    
+    result[0] = new Polygon2D(p0);
+    result[1] = new Polygon2D(p1);
+    
+    return result;
+  }
+  
+  
+  /** Wraps a pointIndex to be within our array bounds. */
+  private int nIndex(int pointIndex) {
+    pointIndex = pointIndex % size();
+    if(pointIndex < 0) {
+      pointIndex += size();
+    }
+    return pointIndex;
+  }
+  
   
   //////// Misc.
   
   
   /** Draws the polygon. */
   public void draw(Graphics2D g) {
-    int numPoints = getNumPoints();
+    int numPoints = size();
   
     for(int j = 0; j < numPoints; j++) {
       // segment start and end points.
