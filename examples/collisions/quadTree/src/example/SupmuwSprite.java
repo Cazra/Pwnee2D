@@ -50,7 +50,7 @@ public class SupmuwSprite extends Sprite {
     /** Loads the images for this Sprite class. */
     public static void loadImages(ImageLoader il) {
          // Obtain the source image.
-         Image srcImg = il.loadFromFile("graphics/SupmuwSprite.png");
+         Image srcImg = il.load("graphics/SupmuwSprite.png");
          
          // Set magenta as the transparent color for the source image.
          srcImg = ImageEffects.setTransparentColor(srcImg, new Color(0xFF00FF));
@@ -143,7 +143,7 @@ public class SupmuwSprite extends Sprite {
     public boolean collidesWith(SupmuwSprite other) {
       if(other == this)
         return false;
-      return (GameMath.sqrDist(this.x, this.y, other.x, other.y) <= (this.cRadius + other.cRadius)*(this.cRadius + other.cRadius));
+      return (GameMath.distSq(this.x, this.y, other.x, other.y) <= (this.cRadius + other.cRadius)*(this.cRadius + other.cRadius));
     }
     
     

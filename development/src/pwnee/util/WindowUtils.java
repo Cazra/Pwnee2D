@@ -9,15 +9,15 @@ import java.awt.*;
 public class WindowUtils {
   
   /** 
-   * Gets the Frame containing a Component. If the Frame cannot be obtained, 
+   * Gets the Window containing a Component. If the Window cannot be obtained, 
    * then null is returned.
    */
-  public static Frame getParentFrame(Component comp) {
-    if(comp instanceof Frame) {
-      return (Frame) comp;
+  public static Window getParentWindow(Component comp) {
+    if(comp instanceof Window) {
+      return (Window) comp;
     }
     else if(comp != null) {
-      return getParentFrame(comp.getParent());
+      return getParentWindow(comp.getParent());
     }
     else {
       return null;

@@ -36,6 +36,9 @@ public class SpritesMain extends JFrame implements WindowListener, WindowFocusLi
         spritesPanel = new SpritesPanel();
         this.add(spritesPanel);
         
+        // Pause the example when it is minimized.
+        spritesPanel.setPauseOnLoseFocus(true);
+        
         // finishing touches on Game window
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);

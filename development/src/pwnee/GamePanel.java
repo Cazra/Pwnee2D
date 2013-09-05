@@ -34,6 +34,7 @@ import java.awt.event.*;
 
 import pwnee.image.ImageLoader;
 import pwnee.input.*;
+import pwnee.util.WindowUtils;
 
 
 /** A JPanel that houses our game's display, manages its top level resources, and handles the top level of the Game's timer-driven model. */
@@ -56,7 +57,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
    * it gets a timer event. 
    * This can be increased to produce fast-forward type effects. 
    */
-  public int stepsPerFrame = 1;
+  
 
   /** A conventience flag for showing everyone that the game is currently loading something.  */
   public boolean isLoading = false;
@@ -116,7 +117,7 @@ public abstract class GamePanel extends JPanel implements ActionListener {
         // Run n iterations through our game's logic (most of the time, this will be 1.)
         // Then perform 1 rendering iteration.
         if(!isPaused) {
-          for(int i =0; i < stepsPerFrame; i++) {
+          for(int i =0; i < _stepsPerFrame; i++) {
             this.logic();
           }
           this.repaint();
@@ -160,8 +161,73 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     //// render our current level:
     // curLevel.render(g);
   }
-   
- /** Sets the frame rate (in frames per second) for the game's timer and starts the game. */
+  
+  //////// UI events
+  
+  private boolean _oldIsPausedMinimize = false;
+  
+  private WindowListener _minimizeListener = null;
+  
+  /** 
+   * If set to true, the GamePanel will pause when its window is minimized. 
+   * Its original pause state will be restored when it is no longer minimized.
+   */
+  public void setPauseOnMinimize(boolean flag) {
+    Window window = WindowUtils.getParentWindow(this);
+    final GamePanel self = this;
+    if(flag && _minimizeListener == null) {
+      _minimizeListener = new WindowAdapter() {
+        
+        public void windowDeiconified(WindowEvent e) {
+          self.isPaused = self._oldIsPausedMinimize;
+        }
+        
+        public void windowIconified(WindowEvent e) {
+          self._oldIsPausedMinimize = self.isPaused;
+          self.isPaused = true;
+        }
+      };
+      window.addWindowListener(_minimizeListener);
+    }
+    else if(!flag && _minimizeListener != null) {
+      window.removeWindowListener(_minimizeListener);
+    }
+  }
+  
+  
+  private boolean _oldIsPausedLoseFocus = false;
+  
+  private FocusListener _focusListener = null;
+  
+  /** 
+   * If set to true, the GamePanel will pause when it loses focus. 
+   * Its original pause state will be restored when it regains focus.
+   */
+  public void setPauseOnLoseFocus(boolean flag) {
+    final GamePanel self = this;
+    if(flag && _focusListener == null) {
+      _focusListener = new FocusAdapter() {
+        
+        public void focusGained(FocusEvent e) {
+          self.isPaused = self._oldIsPausedLoseFocus;
+        }
+        
+        public void focusLost(FocusEvent e) {
+          self._oldIsPausedLoseFocus = self.isPaused;
+          self.isPaused = true;
+        }
+      };
+      this.addFocusListener(_focusListener);
+    }
+    else if(!flag && _focusListener != null) {
+      this.removeFocusListener(_focusListener);
+    }
+  }
+  
+  
+  //////// Game Timer
+  
+  /** Sets the frame rate (in frames per second) for the game's timer and starts the game. */
   public void start(int fps) {
     timer.setFPS(fps);
     this.isRunning = true;
@@ -172,6 +238,30 @@ public abstract class GamePanel extends JPanel implements ActionListener {
   public void start() {
     start(60);
   }
+  
+  /** The number of times to call logic() per frame. */
+  private int _stepsPerFrame = 1;
+  
+  /** 
+   * Sets the number of steps through the game's logic() to do in one frame. 
+   * By default, this is 1. This can be set to a value higher than 1 to 
+   * achieve a fast-forward effect in your game without actually changing the timer.
+   * Setting this is <= 0 will cause the game top never call logic, 
+   * essentially freezing it.
+   */
+  public void setStepsPerFrame(int steps) {
+    _stepsPerFrame = steps;
+  }
+  
+  /** 
+   * Gets the number of steps through the game's logic() to do in one frame. 
+   * By default, this is 1. 
+   */
+  public int getStepsPerFrame() {
+    return _stepsPerFrame;
+  }
+  
+  //////// Level changing
   
   /** 
    * Schedules the game to change to a different level associated with some 
