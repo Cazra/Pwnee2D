@@ -73,7 +73,7 @@ A: It's lightweight, but powerful. It doesn't have quite the horsepower that
 
 Q: How do you pronounce "Pwnee"?
 A: It's pronounced "poh-nee", just like how you pronounce 
-   "vertically-challenged, magic, colorful equines".
+   "vertically-challenged equines".
 
 Q: Is this engine currently stable enough to use?
 A: Yes it is... mostly. Some parts are in flux, but I'll try not to make many
@@ -86,7 +86,10 @@ to document/comment them well.
 
 Q: Do you have an tutorials/examples of how to use Pwnee?
 A: Yes, check out the "examples" folder. The "HelloWorld" tutorial will show
-you how to set up a very basic application using Pwnee.
+you how to set up a very basic application using Pwnee. I apologize if some of
+the examples don't use the latest jar or even use outdated version of methods
+from that jar. I'll eventually clean those up.
+
 
 Don't see an answer to your question here or in the docs? Fire me an email at
 sllindberg21@students.tntech.edu
