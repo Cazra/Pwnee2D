@@ -115,12 +115,12 @@ public abstract class GamePanel extends JPanel implements ActionListener {
          
         // Run n iterations through our game's logic (most of the time, this will be 1.)
         // Then perform 1 rendering iteration.
-        for(int i =0; i < stepsPerFrame; i++) {
-          if(!isPaused) {
+        if(!isPaused) {
+          for(int i =0; i < stepsPerFrame; i++) {
             this.logic();
           }
+          this.repaint();
         }
-        this.repaint();
      
         timer.updateFrameRateCounter();
       }

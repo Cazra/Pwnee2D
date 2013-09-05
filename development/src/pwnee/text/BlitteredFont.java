@@ -99,7 +99,7 @@ public class BlitteredFont {
    */
   public void loadImages(ImageLoader il, String imgPath, Color tColor) {
     // Obtain the source image.
-    Image srcImg = il.loadFromFile(imgPath);
+    Image srcImg = il.load(imgPath);
      
     // Set magenta as the transparent color for the source image.
     srcImg = ImageEffects.setTransparentColor(srcImg, tColor);

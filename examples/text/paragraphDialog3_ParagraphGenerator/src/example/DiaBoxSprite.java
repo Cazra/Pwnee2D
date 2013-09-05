@@ -22,7 +22,7 @@ public class DiaBoxSprite extends Sprite {
     /** Loads the images for this Sprite class. */
     public static void loadImages(ImageLoader il) {
          // Obtain the source image.
-         Image srcImg = il.loadFromFile("graphics/dialogBox.png");
+         Image srcImg = il.load("graphics/dialogBox.png");
          
          // Set magenta as the transparent color for the source image.
          srcImg = ImageEffects.setTransparentColor(srcImg, new Color(0xFF00FF));

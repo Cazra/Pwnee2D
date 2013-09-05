@@ -99,11 +99,14 @@ public class ImageLibrary {
   }
     
     
-  /** Inserts an image from a file into this library with the given key. */
+  /** 
+   * Inserts an image from a file/resource into this library with the given key. 
+   * It will try to load the image from a file first, then as a resource.
+   */
   public Image loadImg(String key, String path) {
     try {
       ImageLoader il = new ImageLoader();
-      Image img = il.loadFromFile(path);
+      Image img = il.load(path);
       put(key, img);
       return img;
     }

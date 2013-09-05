@@ -32,6 +32,9 @@ import java.awt.MediaTracker;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import java.net.URL;
 
@@ -81,24 +84,30 @@ public class ImageLoader {
 		this.nextId++;
 	}
 	
-   /** Forces the application to wait while the ImageLoader finishes loading all the Images currently assigned to it. Afterwards it empties itself.*/
+   /** 
+    * Forces the application to wait while the ImageLoader finishes loading 
+    * all the Images currently assigned to it. Afterwards it empties itself.
+    */
 	public void waitForAll() {
     if(isAsynchronous) {
       isLoading = true;
       
       try {
+        final int _nextId = nextId;
         Thread imgLoaderThread = new Thread() {
           public void run() {
-            progressMax = nextId;
+            progressMax = _nextId;
             progressValue = 0;
-            for(int i = 0; i < nextId; i++) {
+            
+            for(int i = 0; i < progressMax; i++) {
+              progressValue = i;
               try {
                 mt.waitForID(i);
               }
               catch (Exception e) {
               }
-              progressValue = i;
             }
+            progressValue = progressMax;
             
             isLoading = false;
             reset();
@@ -106,6 +115,7 @@ public class ImageLoader {
         };
       }
       catch (Exception e) {
+        e.printStackTrace();
         isLoading = false;
         reset();
       }
@@ -122,13 +132,70 @@ public class ImageLoader {
     }
 	}
 	
+  
+  /** Attempts to load an image first as an external file, then as a resource. */
+  public Image load(String path) {
+    Image result = loadFile(path);
+    if(result == null) {
+      result = loadResource(path);
+    }
+    return result;
+  }
+  
    
-   /** A static method used to load an image from a file and return that image. */
-   public Image loadFromFile(String path) {
+   /** 
+    * Loads an image from a resource file (a file included in your game's 
+    * jar/classpath) and return that image. 
+    */
+   public Image loadResource(String path) {
       URL imageURL =  this.getClass().getClassLoader().getResource(path);
       Image image = Toolkit.getDefaultToolkit().getImage(imageURL);
       return image;
    }
-	
+   
+  
+  /** 
+   * Loads an image from an external file 
+   * (a file not included in the game's jar/classpath). 
+   */
+  public Image loadFile(String path) {
+    return loadFile(new File(path));
+  }
+  
+  public Image loadFile(File file) {
+    try {
+      return ImageIO.read(file);
+    }
+    catch(IOException e) {
+      return null;
+    }
+  }
+  
+  
+  /** 
+   * A static convenience method for loading an image from a resource file 
+   * (a file included in your game's jar/classpath). 
+   * This blocks until the image is entirely loaded.
+   */
+  public static Image loadResourceAndWait(String path) {
+    ImageLoader il = new ImageLoader();
+    Image image = il.loadResource(path);
+    il.addImage(image);
+    il.waitForAll();
+    return image;
+  }
+  
+  /** 
+   * A static convenience method for loading an image from an external file 
+   * (a file not included in your game's jar/classpath). 
+   * This blocks until the image is entirely loaded.
+   */
+  public static Image loadFileAndWait(String path) {
+    ImageLoader il = new ImageLoader();
+    Image image = il.loadFile(path);
+    il.addImage(image);
+    il.waitForAll();
+    return image;
+  }
 }
 
