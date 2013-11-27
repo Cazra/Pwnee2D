@@ -163,44 +163,207 @@ public class GameMath {
 	}
   
   
+  /** Computes the square distance between 2 n-dimensional points. Returns -1 if p1 and p2 are not of the same dimensions. */
+  public static double distSq(double[] p1, double[] p2) {
+    if(p1.length != p2.length) {
+      return -1;
+    }
+    else {
+      double sqLen = 0;
+      for(int i = 0 ; i < p1.length ; i++) {
+        double dN = p1[i] - p2[i];
+        sqLen += dN*dN;
+      }
+      return sqLen;
+    }
+  }
+  
+  /** Computes the distance between 2 n-dimensional points. Returns -1 if p1 and p2 are not of the same dimensions. */
+  public static double dist(double[] p1, double[] p2) {
+    if(p1.length != p2.length) {
+      return -1;
+    }
+    else {
+      double sqLen = 0;
+      for(int i = 0 ; i < p1.length ; i++) {
+        double dN = p1[i] - p2[i];
+        sqLen += dN*dN;
+      }
+      return Math.sqrt(sqLen);
+    }
+  }
+  
+  //////// Vector math
+  
+  /** Returns the length of a vector of n-dimensional size. */
+  public static double length(double[] vector) {
+    double sqLen = 0;
+    for(int i = 0; i < vector.length; i++) {
+      sqLen += vector[i]*vector[i];
+    }
+    return Math.sqrt(sqLen);
+  }
+  
+  /** Computes the normalized form of an n-dimensional vector. */
+  public static double[] normalize(double[] vector) {
+    double[] result = new double[vector.length];
+    
+    double length = length(vector);
+    for(int i = 0; i < vector.length; i++) {
+      result[i] = vector[i]/length;
+    }
+    return result;
+  }
+  
+  /** Computes the negation of an n-dimensional vector. */
+  public static double[] negate(double[] vector) {
+    return scale(vector, -1);
+  }
+  
+  /** Computes the scaled form of an n-dimensional vector. */
+  public static double[] scale(double[] vector, double scale) {
+    double[] result = new double[vector.length];
+    
+    for(int i = 0; i < vector.length; i++) {
+      result[i] = vector[i] * scale;
+    }
+    return result;
+  }
+  
+  /** Computes the translated form of a vector. */
+  public static double[] translate(double[] vector, double[] t) {
+    return add(vector, t);
+  }
+  
+  /** Computes the sum of two n-dimensional vectors. The result vector's size is the maximum size of the input vectors. */
+  public static double[] add(double[] v1, double[] v2) {
+    double[] result;
+    if(v1.length > v2.length) {
+      result = new double[v1.length];
+      
+      for(int i = 0; i < v1.length; i++) {
+        if(i < v2.length) {
+          result[i] = v1[i] + v2[i];
+        }
+        else {
+          result[i] = v1[i];
+        }
+      }
+    }
+    else {
+      result = new double[v2.length];
+      
+      for(int i = 0; i < v2.length; i++) {
+        if(i < v1.length) {
+          result[i] = v1[i] + v2[i];
+        }
+        else {
+          result[i] = v2[i];
+        }
+      }
+    }
+    
+    return result;
+  }
+  
+  /** Computes the difference of two n-dimensional vectors. */
+  public static double[] sub(double[] v1, double[] v2) {
+    return add(v1, negate(v2));
+  }
   
   
+  /** Compute the dot-product of two n-dimensional vectors. */
+  public static double dot(double[] v1, double[] v2) {
+    double result = 0;
+    for(int i = 0; i < v1.length; i++) {
+      result += v1[i]*v2[i];
+    }
+    return result;
+  }
+  
+  /** 
+   * Compute the cross-product of two 3D homogenous vectors. 
+   * The result is the 3D homogenous vector orthogonal to the input vectors. 
+   */
+  public static double[] cross3D(double[] v1, double[] v2) {
+    v1 = extend(v1, 3);
+    v2 = extend(v2, 3);
+    
+    double[] result = new double[4];
+    result[0] = v1[1]*v2[2] - v1[2]*v2[1];
+    result[1] = v1[2]*v2[0] - v1[0]*v2[2];
+    result[2] = v1[0]*v2[1] - v1[1]*v2[0];
+    result[3] = 0;
+    return result;
+  }
+  
+  
+  /** Compute the smaller angle between two vectors, in degrees. */
+  public static double angle(double[] v1, double[] v2) {
+    double dot = dot(v1, v2);
+    double cos = dot/length(v1)/length(v2);
+    return r2d(Math.acos(cos));
+  }
+  
+  /** Compute the smaller angle between two vectors, in radians. */
+  public static double angleR(double[] v1, double[] v2) {
+    double dot = dot(v1, v2);
+    double cos = dot/length(v1)/length(v2);
+    return Math.acos(cos);
+  }
+  
+  public static String toString(double[] vector) {
+    String result = "[";
+    for(int i = 0; i < vector.length; i++) {
+      if(i > 0) {
+        result += ", ";
+      }
+      result += vector[i];
+    }
+    return result + "]";
+  }
+  
+  
+  /** Truncates a vector to be no larger than the given size. */
+  public static double[] truncate(double[] vector, int size) {
+    if(vector.length <= size) {
+      return vector;
+    }
+    else {
+      double[] result = new double[size];
+      for(int i = 0; i < size; i++) {
+        result[i] = vector[i];
+      }
+      return result;
+    }
+  }
+  
+  
+  /** Extends a vector to be no smaller than the given size by padding with 0s. */
+  public static double[] extend(double[] vector, int size) {
+    if(vector.length >= size) {
+      return vector;
+    }
+    else {
+      double[] result = new double[size];
+      for(int i = 0; i < size; i++) {
+        if(i < vector.length) {
+          result[i] = vector[i];
+        }
+        else {
+          result[i] = 0;
+        }
+      }
+      return result;
+    }
+  }
+  
+  /** Sets the size for a vector, truncating it or extending it as needed. */
+  public static double[] setSize(double[] vector, int size) {
+    return truncate(extend(vector, size), size);
+  }
   
   //////// Line/Segment math
-  
-	/** 
-   * Returns the signed normal distance of point p from a vector intersecting q in the direction towards r. 
-   * It is assumed that the positive y axis points down.
-   * If the result is positive, then p is above the vector. 
-   * If it is negative, then p is below the vector.  
-   * @param q    The "start" point of the vector.
-   * @param r    The "end" point of the vector.
-   * @param p    The point we're checking to be above or below the vector.
-   */
-//	public static double isPointAboveSeg(Point2D q, Point2D r, Point2D p) {
-    /** 6/17/2013 - The same functional behavior is provided in Line2D.relativeCCW. 
-    
-    // vector b pointing in the direction of this segment from q to r. 
-		double bx = r.getX() - q.getX();
-		double by = r.getY() - q.getY();
-		double length = Math.sqrt((bx*bx) + (by*by));
-		bx/=length;
-		by/=length;
-		
-		// vector n is the normal vector to b and a (0,0,1) defined by a x b.
-		double nx = by;
-		double ny = 0-bx;
-		
-		// compute denominator for alpha test
-		double denom = bx*ny - by*nx;
-		if( denom == 0)
-			denom = 1;
-			
-		// compute alpha (the signed distance of p from b's axis).
-		return (bx*(p.getY() - q.getY()) + by*(q.getX() - p.getX()))/denom;
-    */
-//    return Line2D.relativeCCW(q.getX(), q.getY(), r.getX(), r.getY(), p.getX(), p.getY());
-//	}
   
   
   /** 
@@ -269,11 +432,27 @@ public class GameMath {
   
   
   
+  
+  /** 
+   * Computes the point of intersection between 2 segments. If an intersection
+   * doesn't exist, return null.
+   */
+  public static Point2D segmentIntersection(double pX, double pY, double qX, double qY, double rX, double rY, double sX, double sY) {
+    // TODO
+    return null;
+  }
+  
+  
+  
+  
+  
   //////// java.lang.Math reimplementations
   
   /** 
    * Raise a number to an integer power (which are much more commonly used in 
    * game programming anyways). 
+   * This method is a little faster than Math.pow, because we don't need to make
+   * any JNI calls here.
    */
   public static double pow(double a, int b) {
     double result = 1;

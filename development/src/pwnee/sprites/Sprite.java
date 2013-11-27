@@ -43,67 +43,58 @@ import pwnee.geom.*;
  */
 public abstract class Sprite {
 
-	/** World X coordinate of the Sprite. */
+	/** X position of the sprite in model coordinates. */
 	public double x = 0;
    
-   /** World Y coordinate of the Sprite. */
-   public double y = 0;	
+   /** Y position of the sprite in model coordinates. */
+  public double y = 0;	
 	
-	/** The central X coordinate of the Sprite relative to its image. */
-	public double focalX = 0;
+	/** The offset of the sprite's X position relative to its image. */
+	protected double focalX = 0;
    
-   /** The central Y coordinate of the Sprite relative to its image. */
-   public double focalY = 0; 
+  /** The offset of the sprite's Y position relative to its image. */
+  protected double focalY = 0; 
 	
 	/** The width of the Sprite's bounding box. Optional, but useful for collisions. */
-	public double width = 1;
+	protected double width = 1;
    
-   /** The height of the Sprite's bounding box. Optional, but useful for collisions. */
-   public double height = 1;
+  /** The height of the Sprite's bounding box. Optional, but useful for collisions. */
+  protected double height = 1;
 	
 	/** Controls the scale transform of the Sprite's image on its x-axis. */
-	public double scaleX = 1;
+	protected double scaleX = 1;
    
-   /** Controls the scale transform of the Sprite's image on its y-axis. */
-   public double scaleY = 1;
+  /** Controls the scale transform of the Sprite's image on its y-axis. */
+  protected double scaleY = 1;
+ 
+  /** 
+   * Controls the uniform transform of the Sprite's image. 
+   * This multiplies both its scaleX and scaleY. 
+   */
+  protected double scaleUni = 1;
+ 
+  /** 
+   * The rotational angle for the sprite in degrees. 
+   * Given the vector z coming out of the screen, this is the angle of the 
+   * sprite around z going counter-clockwise from the positive x axis.
+   */
+	protected double angle = 0;
    
-   /** Controls the uniform transform of the Sprite's image. This multiplies both its scaleX and scaleY. */
-   public double scaleUni = 1;
+  /** The model-view transform of this sprite the last time it was rendered. */
+  protected AffineTransform transform = new AffineTransform();
    
-   /** Used for rotational transformations. This is the angle in degrees of this Sprite's positive x axis to the world's positive x axis. */
-	public double angle = 0;
+  /** A flag to let everyone know that this Sprite is destroyed and scheduled to be discarded. */
+	protected boolean isDestroyed = false;
    
-   /** used to store the Sprite's current rotate-scale transform */
-	public AffineTransform transform = new AffineTransform(); 
-   
-   /** The complete affine transform used to render this sprite on the last frame. */
-   public AffineTransform curTrans = new AffineTransform();
-   
-   /** 
-	 * This becomes true whenever any of the methods for manipulating 
-	 * this Sprite's rotation or scale are called. It lets the render method know to update 
-	 * its rotate-scale transform before drawing.
-	 */
-	public boolean transformChanged = false; 
-   
-   /** A flag to let everyone know that this Sprite is destroyed and scheduled to be discarded. */
-	public boolean isDestroyed = false;
-   
-   /** If this is false, then the Sprite won't be rendered. */
-	public boolean isVisible = true;
+  /** If this is false, then the Sprite won't be rendered. */
+	protected boolean isVisible = true;
 	
 	/** 
    * Controls how opaque or transparent this Sprite is. The value for this 
    * should be in the range [0.0, 1.0], where 0.0 is completely transparent 
    * and 1.0 is completely opaque. 
    */
-   public double opacity = 1.0;
-	
-   /** A convenient array of doubles that can be used for whatever. */
-	public double[] vars = new double[10];
-   
-   
-	
+  protected float opacity = 1.0f;
 	
 	// CONSTRUCTORS
 	
@@ -116,20 +107,74 @@ public abstract class Sprite {
 	public Sprite(double x, double y) {
 		this.x = x;
 		this.y = y;
-      
-      for(int i = 0; i < 10; i++) {
-         vars[i] = 0.0;
-      }
 	}
 	
 	/** 
-   * Marks this Sprite as destroyed. You may also want to override this method 
-   * to do additional processing when this Sprite is destroyed.
+   * Marks this Sprite as "destroyed". The sprite will no longer be rendered
+   * and will return false for all collision detections, but it will not remove
+   * itself from any sprite data structures containing it. That is up to the user.
+   *
+   * Override this method if you want
+   * to do additional clean-up processing when this Sprite is destroyed. 
    */
 	public void destroy() {
 		this.isDestroyed = true;
 	}
 	
+  /** Returns true iff this sprite is currently flagged as "destroyed". */
+  public boolean isDestroyed() {
+    return isDestroyed;
+  }
+  
+  // LOCATION/GEOMETRY
+  
+  /** Returns the X position of the sprite in model coordinates. */
+  public double getX() {
+    return x;
+  }
+  
+  /** Returns the Y position of the sprite in model coordinates. */
+  public double getY() {
+    return y;
+  }
+  
+  
+  /** Returns the point that defines the sprite's location in model coordinates. */
+  public Point2D getPosition() {
+    return new Point2D.Double(x, y);
+  }
+  
+  /** Returns the point that defines the sprite's location in view coordinates*/
+  public Point2D getViewPosition() {
+    return transform.transform(new Point2D.Double(0, 0), null);
+  }
+  
+  /** 
+   * Returns the focal point that defines the offset of the sprite's 
+   * actual location relative to its image.
+   */
+  public Point2D getFocalPoint() {
+    return new Point2D.Double(focalX, focalY);
+  }
+  
+  /** 
+   * Returns the dimensions of the sprite's bounding box.
+   */
+  public Dimension2D getDimensions() {
+    Rectangle2D bounds = getCollisionBox();
+    return new DimensionDouble( bounds.getWidth(), bounds.getHeight());
+  }
+  
+  /** Returns the width of the sprite's bounding box. */
+  public double getWidth() {
+    return getCollisionBox().getWidth();
+  }
+  
+  /** Returns the height of the sprite's bounding box. */
+  public double getHeight() {
+    return getCollisionBox().getHeight();
+  }
+  
 	
 	// RENDERING METHODS
 	
@@ -139,96 +184,148 @@ public abstract class Sprite {
 	 * @param g		The graphics context this is being rendered on.
 	 */
 	public void render(Graphics2D g) {
-		if(isDestroyed || opacity == 0 || !isVisible)
+    
+    // Update our object's model-view transform. 
+    this.transform = createTransform(g.getTransform());
+		if(isDestroyed || opacity == 0 || !isVisible) {
 			return;
+    }
 		
-      // update our image transform so that it's ready for rendering
-		if(transformChanged) 
-			updateTransform();
-		
-      // save the Graphics context's original transform and composite.
+    // Save the original graphics state.
 		AffineTransform oldTrans = g.getTransform(); 
 		Composite oldComp = g.getComposite();
 		
-      // Use an AlphaComposite to apply semi-transparency to the Sprite's image.
-		if(opacity < 1.0)
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) opacity));
+    // Use an AlphaComposite to apply semi-transparency to the Sprite's image.
+		if(opacity < 1.0) {
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+		}
+    
+    // Apply the Sprite's transform to our Graphics context.
+		g.setTransform(this.transform);
 		
-      // Apply the Sprite's transform to our Graphics context.
-		AffineTransform curTrans = g.getTransform();
-		curTrans.translate(this.x,this.y);
-		curTrans.concatenate(this.transform);
-		curTrans.translate(0-focalX,0-focalY);
-		g.setTransform(curTrans);
-		
-      // The draw method shall be defined by the user.
+    // Actual drawing is delegated to the draw() method defined by concrete Sprites.
 		this.draw(g);
 		
-      // Restore the Graphics context's original transform and composite.
+    // Restore the original graphics state.
 		g.setTransform(oldTrans);
 		g.setComposite(oldComp);
-        
-    this.curTrans = curTrans;
 	}
+  
+  /** 
+   * Creates the model-view transform for the sprite. 
+   * The order here is very important.
+   */
+  private AffineTransform createTransform(AffineTransform baseTransform) {
+    AffineTransform transform = baseTransform;
+		transform.translate(this.x, this.y);
+    transform.rotate(0-GameMath.d2r(angle));
+    transform.scale(scaleX*scaleUni, scaleY*scaleUni);
+		transform.translate(0-focalX, 0-focalY);
+    return transform;
+  }
 	
 	/**	
-	 * Called by the render method to draw the image for the Sprite. 
-    * The user is expected to define this to do their own custom drawing.
+	 * Called by the render method to draw the current image for the Sprite. 
 	 * @param g		The Graphics context this is being rendered with.
 	 **/
-   public abstract void draw(Graphics2D g);
+  public abstract void draw(Graphics2D g);
    
 	
-	// COLOR TRANSFORM METHODS
+	// COLOR TRANSFORM METHODS/VISIBILITY
 	
 	/**
-	 *	Safely sets the opacity so that it is always in the range [0.0, 1.0].
-    * @param alpha   The desired opacity.
+	 * Sets the sprite's opacity, clamped to the range [0.0, 1.0].
+   * A sprite with opacity 0.0 is completely transparent, and a sprite with 
+   * opacity 1.0 is completely opaque.
+   * @param opacity   The desired opacity.
 	 */
-	public void setOpacity(double alpha) {
-		opacity = Math.min(1.0, Math.max(0.0, alpha));
+	public void setOpacity(double opacity) {
+		opacity = (float) Math.min(1.0, Math.max(0.0, opacity));
 	}
-   
-	
+  
+  /** 
+   * Returns the sprite's current opacity in the range [0.0, 1.0). 
+   * A sprite with opacity 0.0 is completely transparent, and a sprite with 
+   * opacity 1.0 is completely opaque.
+   */
+	public float getOpacity() {
+    return opacity;
+  }
+  
+  
+  /** Set whether this sprite is visible. */
+  public void setVisible(boolean visible) {
+    this.isVisible = visible;
+  }
+  
+  
+  /** Returns true iff this sprite is set as visible. */
+  public boolean isVisible() {
+    return isVisible;
+  }
+  
 	// IMAGE TRANSFORM METHODS
 	
-	/** Sets the x and y scale components of this Sprite's transform. */
-	public void scale(double x, double y) {
+	/** Sets the sprite's x and y scales. */
+	public void setScale(double x, double y) {
 		this.scaleX = x;
 		this.scaleY = y;
-		this.transformChanged = true;
 	}
+  
+  /** Gets the scale of the sprite along its X axis. */
+  public double getScaleX() {
+    return scaleX;
+  }
+  
+  /** Gets the scale of the sprite along its Y axis. */
+  public double getScaleY() {
+    return scaleY;
+  }
+  
+  /** Sets the sprite's uniform scale. */
+  public void setScale(double u) {
+    this.scaleUni = u;
+  }
+  
+  /** Gets the uniform scale of the sprite. */
+  public double getScale() {
+    return scaleUni;
+  }
 	
-   /** Sets the rotation component of this Sprite's transform. */
-	public void rotate(double degrees) {
-		this.angle = degrees;
-		this.transformChanged = true;
+  /** Sets the sprite's rotational angle in degrees and wraps it within the range [0.0, 360). */
+	public void setAngle(double degrees) {
+    this.angle = degrees % 360;
+    if(this.angle < 0) {
+      this.angle += 360;
+    }
 	}
+  
+  /** Sets the sprite's rotational angle in radians and wraps it within the range [0.0, 2*PI). */
+  public void setAngleR(double radians) {
+    setAngle(GameMath.r2d(radians));
+  }
+  
+  /** Gets the rotational angle of the sprite in degrees. */
+  public double getAngle() {
+    return angle;
+  }
+  
+  /** Gets the rotational angle of the sprite in radians. */
+  public double getAngleR() {
+    return GameMath.d2r(angle);
+  }
 	
-	/** 	Helper method updates the rotate-scale transform matrix for this Sprite. */
-	public void updateTransform() {
-      // Start with an ID transform
-		transform = new AffineTransform();
-		
-		transform.rotate(0-GameMath.d2r(angle));
-		transform.scale(scaleX*scaleUni,scaleY*scaleUni);
-	}
+  /** Returns a copy of the model-view transform for this sprite. */
+  public AffineTransform getTransform() {
+    return new AffineTransform(transform);
+  }
 	
 	
 	//////////////////// COLLISION METHODS
 	
   
-  /** 
-   * Returns the dimensions of the sprite's bounding box. 
-   * Override this to suit your sprite's needs.
-   */
-  public Dimension2D getDimensions() {
-    return new DimensionDouble( width*scaleX, height*scaleY);
-  }  
-  
-	
 	/** 
-   * Returns the bounding box of the Sprite as a Rectangle2D object. 
+   * Returns the unrotated bounding box of the Sprite as a Rectangle2D object. 
    * Override this to suit your sprite's needs.
    */
 	public Rectangle2D getCollisionBox() {	
@@ -238,7 +335,7 @@ public abstract class Sprite {
   
   /** 
    * Returns the sprite's bounding convex polygon used for Separating Axis Theorem collision tests. 
-   * The default implementation returns a the boundind rectangle, with transforms. 
+   * The default implementation returns the sprite's transformed bounding box (including rotation!). 
    * Override this to suit your sprite's needs.
    */
   public Polygon2D getCollisionPoly() {
@@ -250,7 +347,8 @@ public abstract class Sprite {
     double right = left + width*scaleX;
     double bottom = top + height*scaleY;
     
-    // define the rectangle's points in clockwise order (in game coordinates, y axis is down).
+    // Define the rectangle's points in clockwise order (in game coordinates, y axis is down).
+    // These points are in object coordinates.
     Point2D[] p = new Point2D[4];
     p[0] = new Point2D.Double(left, top);
     p[1] = new Point2D.Double(right, top);
@@ -260,29 +358,33 @@ public abstract class Sprite {
     double[] x = new double[4];
     double[] y = new double[4];
     
+    // Rotate, then translate each point to get them in model coordinates.
     for(int i = 0; i < 4; i++) {
-      // rotate, then translate the point.
       AffineTransform transform = AffineTransform.getTranslateInstance(this.x, this.y);
       transform.rotate(0-GameMath.d2r(angle));
       
       p[i] = transform.transform(p[i], null);
-      
-      
       x[i] = p[i].getX();
       y[i] = p[i].getY();
     }
     
+    // Use our model coordinates to produce the collision polygon.
     return new Polygon2D(x, y);
   } 
    
-   /**
+  /**
    * Tests if this sprite is colliding with some other sprite. 
    * The user is expected to override this method in most cases.
-   * A default definition is provided here which does a non-rotated bounding box collision test between the sprites.
+   * A default definition is provided here which does a non-rotated bounding 
+   * box collision test between the sprites.
    * @param other     The sprite we are checking for a collision with this sprite.
    * @return          true if this and other are colliding. Otherwise false.
    */
-   public boolean isOverlapping(Sprite other) {
+  public boolean isOverlapping(Sprite other) {
+    if(this.isDestroyed() || other.isDestroyed()) {
+      return false;
+    }
+    else {
       Rectangle2D tBox = this.getCollisionBox();
       Rectangle2D oBox = other.getCollisionBox();
       
@@ -291,7 +393,8 @@ public abstract class Sprite {
       if(tBox.getY() > oBox.getY() + oBox.getHeight()) return false;
       if(tBox.getY() + tBox.getHeight() < oBox.getY()) return false;
       return true;
-   }
+    }
+  }
 
 }
 

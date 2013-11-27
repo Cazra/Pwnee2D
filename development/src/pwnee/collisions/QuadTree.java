@@ -103,7 +103,7 @@ public class QuadTree {
   /** Inserts a sprite into the quadtree. */
   public boolean insert(Sprite s) {
     // Do not insert sprites that are marked as destroyed.
-    if(s.isDestroyed)
+    if(s.isDestroyed())
       return false;
     
     // Do not insert sprites that are completely outside of the quadtree's area.
@@ -141,7 +141,7 @@ public class QuadTree {
    */
   public List<Sprite> query(Sprite s) {
     // Do not query sprites that are marked as destroyed.
-    if(s.isDestroyed)
+    if(s.isDestroyed())
       return new ArrayList<Sprite>();
     
     // Do not query sprites that are completely outside of the quadtree's area.

@@ -21,7 +21,7 @@ public class SpritesPanel extends GamePanel {
         SupmuwSprite.loadImages(this.imgLoader);
         
         // create our supmuws.
-        for(int i = 0; i < 1; i++) {
+        for(int i = 0; i < 100; i++) {
             supmuws.add(new SupmuwSprite(GameMath.rand.nextInt(640), GameMath.rand.nextInt(480), GameMath.rand.nextDouble()*4+0.1));
         }
         

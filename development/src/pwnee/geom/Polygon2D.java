@@ -8,8 +8,8 @@ import java.util.List;
 
 import pwnee.GameMath;
 
-/** A polygon whose points are stored as doubles. */
-public class Polygon2D {
+/** A polygon whose vertices are stored as doubles. */
+public class Polygon2D { // implements Shape {
   
   private double[] x;
   private double[] y;
@@ -48,13 +48,13 @@ public class Polygon2D {
     return x.length;
   }
   
-  
+  /** Returns the vertex in the polygon with the specified index. */
   public Point2D getPoint(int index) {
     index = nIndex(index);
     return new Point2D.Double(x[index], y[index]);
   }
   
-  
+  /** Returns the list of vertices in the polygon. */
   public List<Point2D> getPoints() {
     List<Point2D> points = new ArrayList<>();
     
@@ -65,10 +65,10 @@ public class Polygon2D {
     return points;
   }
   
-  //////// Collisions
+  //////// Shape implementation
   
   
-  /** Returns true iff this polygon is convex and it contains the specified point. */
+  /** Returns true if this polygon is convex and it contains the specified point. */
   public boolean contains(double x, double y) {
     int numPoints = size();
     
@@ -78,7 +78,7 @@ public class Polygon2D {
     // The point will be "above" all the segments if the vertices were specified in ccw order. 
     boolean aboveAll = true; 
     
-    // iterate over this polygon's segments. 
+    // Iterate over this polygon's segments. 
     for(int j = 0; j < numPoints; j++) {
       // segment start and end points.
       double sx = this.x[j];
@@ -86,7 +86,8 @@ public class Polygon2D {
       double ex = this.x[(j+1) % numPoints];
       double ey = this.y[(j+1) % numPoints];
       
-      // return false early if the point has been found to be neither above nor below all this polygon's segments.
+      // Return false early if the point has been found to be neither above 
+      // nor below all this polygon's segments.
       int relCCW = Line2D.relativeCCW(sx, sy, ex, ey, x, y);
       if(relCCW > 0) {
         underAll = false;
@@ -99,10 +100,13 @@ public class Polygon2D {
       }
     }
     
-    // either the point was above or above all this polygon's segments.
+    // Either the point is above or above all this polygon's segments, and is therefore inside it.
     return true;
   }
   
+  
+  
+  /** Returns true iff this polygon is convex and it contains the specified point. */
   public boolean contains(Point2D p) {
     if(p == null) {
       return false;
@@ -111,12 +115,23 @@ public class Polygon2D {
   }
   
   
-  /** Tests if this and another convex polygon are intersecting using the Separating Axis Theorem. */
+  /** Tests if the interior of the polygon intersects the interior of another polygon. */
   public boolean intersects(Polygon2D other) {
-    // There is only a collision if no separating axis could be found.
+    
+    // Use the Separating Axis Theorem to determine if there is an intersection. 
     return !(this.halfSAT(other) || other.halfSAT(this));
   }
   
+  /** Tests if the interior of the polygon intersects the interior of a specified Rectangle2D. */
+  public boolean intersects(Rectangle2D r) {
+    return intersects(rectToPoly(r));
+  }
+  
+  
+  
+  
+  
+  //////// Algorithm helper methods
   
   /** 
    * Return true if there is a tangent line on one of this poly's segments 
@@ -124,17 +139,6 @@ public class Polygon2D {
    * Right now this only works if the points are specified in clockwise order (in game geometry).
    */
   private boolean halfSAT(Polygon2D other) {
-    /*
-    for(int i = 0; i < size(); i++) {
-      double xx = x[i];
-      double yy = y[i];
-      
-      if(other.contains(xx, yy)) {
-        return true;
-      }
-    }
-    return false;
-    */
     
     // All the points in the other polygon will be "above" all the segments if the vertices were specified in ccw order. 
     int numPoints = size();
@@ -165,7 +169,76 @@ public class Polygon2D {
   }
   
   
-  //////// Geometry 
+  
+  
+  /** A line segment whose endpoints are ordered from left to right, then top to bottom. */
+  private class Segment implements Comparable<Segment> {
+    
+    double x1, y1, x2, y2;
+    
+    public Segment(double x1, double y1, double x2, double y2) {
+      if(x1 < x2) {
+        this.x1 = x1;
+        this.y1 = y1;
+        
+        this.x2 = x2;
+        this.y2 = y2;
+      }
+      else if(x2 < x1) {
+        this.x1 = x2;
+        this.y1 = y2;
+        
+        this.x2 = x1;
+        this.y2 = y1;
+      }
+      else {
+        if(y1 < y2) {
+          this.x1 = x1;
+          this.y1 = y1;
+          
+          this.x2 = x2;
+          this.y2 = y2;
+        }
+        else {
+          this.x1 = x2;
+          this.y1 = y2;
+          
+          this.x2 = x1;
+          this.y2 = y1;
+        }
+      }
+    }
+    
+    
+    
+    /** Segments are ordered by their start points from left to right, then top to bottom. */
+    public int compareTo(Segment other) {
+      if(this.x1 < other.x1) {
+        return -1;
+      }
+      else if(other.x1 < this.x1) {
+        return 1;
+      }
+      else {
+        if(this.y1 < other.y1) {
+          return -1;
+        }
+        else if(other.y1 < this.y1) {
+          return 1;
+        }
+        else {
+          return 0;
+        }
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
+  //////// Transforming the polygon. 
   
   /** Translates the polygon. */
   public Polygon2D translate(double dx, double dy) {
@@ -197,20 +270,20 @@ public class Polygon2D {
   }
   
   /** Scales the polygon uniformly along the x and y axes. */
-  public Polygon2D scale(double amt) {
-    return scale(amt, amt);
+  public Polygon2D scale(double u) {
+    return scale(u, u);
   }
   
   
   /** Rotates the polygon counter-clockwise (in game geometry) by the specified number of degrees. */
-  public Polygon2D rotate(double angle) {
-    return transform(AffineTransform.getRotateInstance(0-GameMath.d2r(angle)));
+  public Polygon2D rotate(double degrees) {
+    return transform(AffineTransform.getRotateInstance(0-GameMath.d2r(degrees)));
   }
   
   
   /** Rotates the polygon counter-clockwise (in game geometry) by the specified number of radians. */
-  public Polygon2D rrotate(double angle) {
-    return transform(AffineTransform.getRotateInstance(0-angle));
+  public Polygon2D rotateR(double radians) {
+    return transform(AffineTransform.getRotateInstance(0-radians));
   }
   
   
@@ -230,7 +303,7 @@ public class Polygon2D {
   }
   
   
-  
+  //////// Static utilities for converting shapes to Polygon2Ds.
   
   /** Convert a Rectangle2D into a Polygon2D. */
   public static Polygon2D rectToPoly(Rectangle2D rect) {
@@ -341,8 +414,7 @@ public class Polygon2D {
   }
   
   
-  //////// Misc.
-  
+  //////// Rendering
   
   /** Draws the polygon. */
   public void draw(Graphics2D g) {

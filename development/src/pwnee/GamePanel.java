@@ -239,6 +239,21 @@ public abstract class GamePanel extends JPanel implements ActionListener {
     start(60);
   }
   
+  /** 
+   * Sets whether the game is hard-paused or not. 
+   * If the game becomes hard-paused, it will skip logic() and repaint()
+   * iterations called by the timer. 
+   */
+  public void setPaused(boolean flag) {
+    isPaused = flag;
+  }
+  
+  
+  /** Stops the game's timer. */
+  public void stop() {
+    timer.stop();
+  }
+  
   /** The number of times to call logic() per frame. */
   private int _stepsPerFrame = 1;
   

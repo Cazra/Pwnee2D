@@ -24,7 +24,7 @@ public class BallSprite extends Sprite {
         width = 32;
         height = 32;
         
-        scale(scale, scale);
+        setScale(scale, scale);
         
     }
     

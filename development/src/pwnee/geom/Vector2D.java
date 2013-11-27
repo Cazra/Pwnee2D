@@ -76,13 +76,13 @@ public class Vector2D {
   
   
   /** Rotates the vector counter-clockwise (in game geometry) by the specified number of degrees. */
-  public Vector2D rotate(double angle) {
-    return rrotate(GameMath.d2r(angle));
+  public Vector2D rotate(double degrees) {
+    return rotateR(GameMath.d2r(degrees));
   }
   
   /** Rotates the vector counter-clockwise (in game geometry) by the specified number of radians. */
-  public Vector2D rrotate(double angle) {
-    AffineTransform trans = AffineTransform.getRotateInstance(0-angle);
+  public Vector2D rotateR(double radians) {
+    AffineTransform trans = AffineTransform.getRotateInstance(0-radians);
     Point2D pt = new Point2D.Double(dx, dy);
     pt = trans.transform(pt, null);
     

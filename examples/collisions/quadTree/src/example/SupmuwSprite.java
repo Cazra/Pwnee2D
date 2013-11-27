@@ -37,7 +37,7 @@ public class SupmuwSprite extends Sprite {
         dy = GameMath.rand.nextDouble()*6-3;
         
         // The image we're using for the Sprite in this example is pretty tiny. So let's scale it up a bit.
-        this.scale(scale,scale);
+        setScale(scale,scale);
         width = 24;
         height = 24;
         cRadius = 8*scale;
