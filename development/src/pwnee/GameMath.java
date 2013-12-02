@@ -82,6 +82,11 @@ public class GameMath {
 		return Math.cos(d2r(degrees));
 	}
 	
+  
+  /** Clamps some value between the given inclusive range. */
+  public static double clamp(double value, double min, double max) {
+    return Math.min(1, Math.max(0, value));
+  }
 	
 	/** 
    * Returns the angle in degrees from one point to another, 
@@ -302,6 +307,7 @@ public class GameMath {
   public static double angle(double[] v1, double[] v2) {
     double dot = dot(v1, v2);
     double cos = dot/length(v1)/length(v2);
+    cos = clamp(cos, -1, 1);
     return r2d(Math.acos(cos));
   }
   
@@ -312,6 +318,7 @@ public class GameMath {
     return Math.acos(cos);
   }
   
+  /** Returns a String representation for a vector. */
   public static String toString(double[] vector) {
     String result = "[";
     for(int i = 0; i < vector.length; i++) {
@@ -363,6 +370,17 @@ public class GameMath {
     return truncate(extend(vector, size), size);
   }
   
+  
+  /** Returns true iff the vector is zero, given some tolerance. */
+  public static boolean isZero(double[] vector, double tolerance) {
+    for(int i = 0; i < vector.length; i++) {
+      if(vector[i]*vector[i] >= tolerance) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   //////// Line/Segment math
   
   
@@ -381,26 +399,8 @@ public class GameMath {
     double rY = line2.getY1();
     double sX = line2.getX2();
     double sY = line2.getY2();
-    
-    double pqx = pX - qX;
-    double pqy = pY - qY;
-    double sqx = sX - qX;
-    double rsy = rY - sY;
-    double rsx = rX - sX;
-    double sqy = sY - qY;
-    
-    double top    = sqx*pqy - pqx*sqy;
-    double bottom = pqx*rsy - rsx*pqy;
-    
-    if(bottom == 0) {
-      return null;
-    }
-    
-    double alpha = top/bottom;
-    double x = alpha * rX + (1-alpha)*sX;
-    double y = alpha * rY + (1-alpha)*sY;
-    
-    return new Point2D.Double(x,y);
+
+    return lineIntersection(pX, pY, qX, qY, rX, rY, sX, sY);
   }
   
   /** 
@@ -426,22 +426,8 @@ public class GameMath {
     double x = alpha * rX + (1-alpha)*sX;
     double y = alpha * rY + (1-alpha)*sY;
     
-    return new Point2D.Double(x,y);
+    return new Point2D.Double(x, y);
   }
-  
-  
-  
-  
-  
-  /** 
-   * Computes the point of intersection between 2 segments. If an intersection
-   * doesn't exist, return null.
-   */
-  public static Point2D segmentIntersection(double pX, double pY, double qX, double qY, double rX, double rY, double sX, double sY) {
-    // TODO
-    return null;
-  }
-  
   
   
   

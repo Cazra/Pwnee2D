@@ -395,6 +395,46 @@ public abstract class Sprite {
       return true;
     }
   }
-
+  
+  
+  //////// Anonymous properties
+  
+  /** 
+   * This method can be overridden to provide access to numerical  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns 0.
+   */
+  public double getProperty(int propertyCode) {
+    return 0;
+  }
+  
+  /** 
+   * Sets the value for some numerical property of an anonymous instance. 
+   * See getProperty(int). 
+   * The default implementation is empty.
+   */
+  public void setProperty(int propertyCode, double value) {
+  }
+  
+  /** 
+   * This method can be overridden to provide access to boolean  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns false.
+   */
+  public boolean getFlag(int flagCode) {
+    return false;
+  }
+  
+  /** 
+   * Sets the value for some boolean property of an anonymous instance. 
+   * See getFlag(int). 
+   * The default implementation is empty.
+   */
+  public void setFlag(int flagCode, boolean value) {
+  }
 }
 

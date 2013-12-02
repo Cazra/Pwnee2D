@@ -1,8 +1,37 @@
 package pwnee.geom;
 
+/*======================================================================
+ * 
+ * Pwnee - A lightweight 2D Java game engine
+ * 
+ * Copyright (c) 2012 by Stephen Lindberg (sllindberg21@students.tntech.edu)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+======================================================================*/
+
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -64,6 +93,16 @@ public class Polygon2D { // implements Shape {
     
     return points;
   }
+  
+  /** Wraps a pointIndex to be within our array bounds. */
+  private int nIndex(int pointIndex) {
+    pointIndex = pointIndex % size();
+    if(pointIndex < 0) {
+      pointIndex += size();
+    }
+    return pointIndex;
+  }
+  
   
   //////// Shape implementation
   
@@ -170,73 +209,15 @@ public class Polygon2D { // implements Shape {
   
   
   
-  
-  /** A line segment whose endpoints are ordered from left to right, then top to bottom. */
-  private class Segment implements Comparable<Segment> {
-    
-    double x1, y1, x2, y2;
-    
-    public Segment(double x1, double y1, double x2, double y2) {
-      if(x1 < x2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        
-        this.x2 = x2;
-        this.y2 = y2;
-      }
-      else if(x2 < x1) {
-        this.x1 = x2;
-        this.y1 = y2;
-        
-        this.x2 = x1;
-        this.y2 = y1;
-      }
-      else {
-        if(y1 < y2) {
-          this.x1 = x1;
-          this.y1 = y1;
-          
-          this.x2 = x2;
-          this.y2 = y2;
-        }
-        else {
-          this.x1 = x2;
-          this.y1 = y2;
-          
-          this.x2 = x1;
-          this.y2 = y1;
-        }
-      }
-    }
-    
-    
-    
-    /** Segments are ordered by their start points from left to right, then top to bottom. */
-    public int compareTo(Segment other) {
-      if(this.x1 < other.x1) {
-        return -1;
-      }
-      else if(other.x1 < this.x1) {
-        return 1;
-      }
-      else {
-        if(this.y1 < other.y1) {
-          return -1;
-        }
-        else if(other.y1 < this.y1) {
-          return 1;
-        }
-        else {
-          return 0;
-        }
-      }
-    }
+  /** TODO */
+  private boolean bentleyOttmanLineSweep(Polygon2D other) {
+    return Polygon2D.bentleyOttmanLineSweep(this, other);
   }
   
-  
-  
-  
-  
+  /** TODO */
+  private static boolean bentleyOttmanLineSweep(Polygon2D p1, Polygon2D p2) {
+    return false;
+  }
   
   //////// Transforming the polygon. 
   
@@ -372,46 +353,48 @@ public class Polygon2D { // implements Shape {
 
   
   
+  
+  
+  //////// Polygon set theory
+  
+  
   /** 
-   * Splits a polygon into two polygons given two vertex indices to form a 
-   * splitting segment between.
+   * TODO Returns a polygon representing the union of this polygon with another polygon. 
    */
-  public Polygon2D[] splitPoly(int i1, int i2) {
-    Polygon2D[] result = new Polygon2D[2];
-    
-    while(i2 < i1) {
-      i2 += size();
-    }
-    
-    int size0 = i2-i1 + 1;
-    int size1 = size() - size0 + 2;
-    
-    Point2D[] p0 = new Point2D[size0];
-    Point2D[] p1 = new Point2D[size1];
-    
-    for(int i = 0; i < size0; i++) {
-      p0[i] = getPoint(i1 + i);
-    }
-    
-    for(int i = 0; i < size1; i++) {
-      p1[i] = getPoint(i2+i);
-    }
-    
-    result[0] = new Polygon2D(p0);
-    result[1] = new Polygon2D(p1);
-    
-    return result;
+  public Polygon2D union(Polygon2D other) {
+    return Polygon2D.union(this, other);
+  }
+  
+  /** TODO Returns a polygon representing the union of two polygons. */
+  public static Polygon2D union(Polygon2D p1, Polygon2D p2) {
+    return null;
   }
   
   
-  /** Wraps a pointIndex to be within our array bounds. */
-  private int nIndex(int pointIndex) {
-    pointIndex = pointIndex % size();
-    if(pointIndex < 0) {
-      pointIndex += size();
-    }
-    return pointIndex;
+  /** TODO Returns a polygon representing the area of intersection between this polygon and another polygon. */
+  public Polygon2D intersection(Polygon2D other) {
+    return Polygon2D.intersection(this, other);
   }
+  
+  /** TODO Returns a polygon representing the area of intersection between two polygons. */
+  public static Polygon2D intersection(Polygon2D p1, Polygon2D p2) {
+    return null;
+  }
+  
+  
+  /** TODO Returns a polygon representing the difference between this polygon and another polygon.*/
+  public Polygon2D difference(Polygon2D other) {
+    return Polygon2D.difference(this, other);
+  }
+  
+  
+  /** TODO Returns a polygon representing the difference between two polygons. */
+  public static Polygon2D difference(Polygon2D p1, Polygon2D p2) {
+    return null;
+  }
+  
+  
+  
   
   
   //////// Rendering
