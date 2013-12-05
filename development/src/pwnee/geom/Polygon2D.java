@@ -31,13 +31,20 @@ package pwnee.geom;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 import pwnee.GameMath;
+import pwnee.geom.algs.BentleyOttmannLineSweepAlgorithm;
+import pwnee.util.SortedArrayList;
 
-/** A polygon whose vertices are stored as doubles. */
+/** A connected polygon whose vertices are stored as doubles. */
 public class Polygon2D { // implements Shape {
   
   private double[] x;
@@ -209,15 +216,27 @@ public class Polygon2D { // implements Shape {
   
   
   
-  /** TODO */
-  private boolean bentleyOttmanLineSweep(Polygon2D other) {
-    return Polygon2D.bentleyOttmanLineSweep(this, other);
+  /** 
+   * Returns the set of line segments representing this polygon in no particular order. 
+   */
+  public Set<Segment2D> getSegments() {
+    Set<Segment2D> result = new HashSet<>();
+    
+    for(int i = 0; i < x.length; i++) {
+      int next = nIndex(i+1);
+      result.add(new Segment2D(x[i], y[i], x[next], y[next]));
+    }
+    
+    return result;
   }
   
-  /** TODO */
-  private static boolean bentleyOttmanLineSweep(Polygon2D p1, Polygon2D p2) {
-    return false;
+  
+  /** Returns the set of points at which two polygons intersect. */
+  public static Set<Point2D> getIntersectionPoints(Polygon2D p1, Polygon2D p2) {
+    return null; // BentleyOttmannLineSweepAlgorithm.lineSweep(p1.getSegments(), p2.getSegments());
   }
+  
+  
   
   //////// Transforming the polygon. 
   

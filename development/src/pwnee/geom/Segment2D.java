@@ -31,6 +31,7 @@ package pwnee.geom;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -45,57 +46,21 @@ import pwnee.GameMath;
  */
 public class Segment2D extends Line2D implements Comparable<Segment2D> {
   
-  private static final double TOL = 0.000001;
-  
-  
   /** The endpoint coordinates of the segment. */
   private double x1, y1, x2, y2;
   
-  /** Whether this segment is known to exist on the inside of a polygon. */
-  private boolean insidePoly = false;
   
   /** Constructs the line segment with its endpoints sorted. */
   public Segment2D(double x1, double y1, double x2, double y2) {
-    setSortedLine(x1, y1, x2, y2);
+    this.x1 = x1;
+    this.x2 = x2;
+    this.y1 = y1;
+    this.y2 = y2;
   }
   
-  
-  
-  /** Sets the endpoints for the segment sorted from left to right, then top to bottom. */
-  private void setSortedLine(double x1, double y1, double x2, double y2) {
-    if(x1 < x2) {
-      this.x1 = x1;
-      this.y1 = y1;
-      
-      this.x2 = x2;
-      this.y2 = y2;
-    }
-    else if(x2 < x1) {
-      this.x1 = x2;
-      this.y1 = y2;
-      
-      this.x2 = x1;
-      this.y2 = y1;
-    }
-    else {
-      if(y1 < y2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        
-        this.x2 = x2;
-        this.y2 = y2;
-      }
-      else {
-        this.x1 = x2;
-        this.y1 = y2;
-        
-        this.x2 = x1;
-        this.y2 = y1;
-      }
-    }
+  public Segment2D(Point2D p1, Point2D p2) {
+    this(p1.getX(), p1.getY(), p2.getX(), p2.getY());
   }
-  
-  
   
   
   /** Two segments are equal iff their sorted endpoints are the same. */
@@ -103,10 +68,10 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
     if(obj instanceof Segment2D) {
       Segment2D other = (Segment2D) obj;
       
-      return (this.x1 == other.x1 && 
-              this.x2 == other.x2 && 
-              this.y1 == other.y1 &&
-              this.y2 == other.y2);
+      Point2D[] ends1 = this.getSortedEndpoints();
+      Point2D[] ends2 = other.getSortedEndpoints();
+      
+      return (ends1[0].equals(ends2[0]) && ends1[1].equals(ends2[1]));
     }
     else {
       return false;
@@ -115,86 +80,28 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
   
   
   /** 
-   * Segments are ordered by their start points from left to right, 
-   * then top to bottom. 
-   * If two segments share start points, they are ordered the same way by their
-   * end points.
+   * Segments are compared in line sweep order.
    */
   public int compareTo(Segment2D other) {
-    int compareP1 = this.compareP1(other);
-    if(compareP1 == 0) {
-      return this.compareP2(other);
+    Point2D[] ends1 = this.getSortedEndpoints();
+    Point2D[] ends2 = other.getSortedEndpoints();
+    
+    Comparator<Point2D> c = getLineSweepComparator();
+    
+    int compare = c.compare(ends1[0], ends2[0]);
+    if(compare == 0) {
+      return c.compare(ends1[1], ends2[1]);
     }
     else {
-      return compareP1;
+      return compare;
     }
   }
   
-  /** Compares two segments by their start points. */
-  public int compareP1(Segment2D other) {
-    if(this.x1 < other.x1) {
-      return -1;
-    }
-    else if(other.x1 < this.x1) {
-      return 1;
-    }
-    else {
-      if(this.y1 < other.y1) {
-        return -1;
-      }
-      else if(other.y1 < this.y1) {
-        return 1;
-      }
-      else {
-        return 0;
-      }
-    }
-  }
-  
-  /** Compares two segments by their end points. */
-  public int compareP2(Segment2D other) {
-    if(this.x2 < other.x2) {
-      return -1;
-    }
-    else if(other.x2 < this.x2) {
-      return 1;
-    }
-    else {
-      if(this.y2 < other.y2) {
-        return -1;
-      }
-      else if(other.y2 < this.y2) {
-        return 1;
-      }
-      else {
-        return 0;
-      }
-    }
-  }
-  
-  
-  /** Returns a Comparator that compares segments only by their y position. */
-  public Comparator<Segment2D> getYComparator() {
-    return new Comparator<Segment2D>() {
-      
-      public int compare(Segment2D s1, Segment2D s2) {
-        if(s1.y1 < s2.y1) {
-          return -1;
-        }
-        else if(s2.y1 < s1.y1) {
-          return 1;
-        }
-        else {
-          return 0;
-        }
-      }
-    };
-  }
   
   
   /** A segment represents a point if its endpoints are the same. */
   public boolean isPoint() {
-    return (x1 == x2 && y1 == y2);
+    return getP1().equals(getP2());
   }
   
   /** Gets the vector from the first point to the second point in the segment. */
@@ -207,37 +114,61 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
     return GameMath.dist(x1, y1, x2, y2);
   }
   
+  
+  
+  
+  
   //////// Line2D implementation
   
+  @Override
   public Point2D getP1() {
     return new Point2D.Double(x1, y1);
   }
   
+  /** Gets the first point of the segment in line-sweep order. */
+  public Point2D getSortedP1() {
+    return getSortedEndpoints()[0];
+  }
+  
+  @Override
   public Point2D getP2() {
     return new Point2D.Double(x2, y2);
   }
   
+  /** Gets the second point of the segment in line-sweep order. */
+  public Point2D getSortedP2() {
+    return getSortedEndpoints()[1];
+  }
+  
+  @Override
   public double getX1() {
     return x1;
   }
   
+  @Override
   public double getX2() {
     return x2;
   }
   
+  @Override
   public double getY1() {
     return y1;
   }
   
+  @Override
   public double getY2() {
     return y2;
   }
   
+  @Override
   public void setLine(double x1, double y1, double x2, double y2) {
-    setSortedLine(x1, y1, x2, y2);
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
   }
   
-  
+  @Override
   public Rectangle2D getBounds2D() {
     double minY = Math.min(y1, y2);
     double maxY = Math.max(y1, y2);
@@ -246,22 +177,77 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
   }
   
   
+  //////// Endpoint comparison
+  
+  /** Cached Comparator. */
+  private static Comparator<Point2D> lineSweepComp = null;
+  
+  /** Produces a Comparator that sorts end points from left to right, top to bottom. */
+  public static Comparator<Point2D> getLineSweepComparator() {
+    if(lineSweepComp == null) {
+      lineSweepComp = new Comparator<Point2D>() {
+        public int compare(Point2D p1, Point2D p2) {
+          if(p1.getX() == p2.getX()) {
+            if(p1.getY() == p2.getY()) {
+              return 0;
+            }
+            else if(p1.getY() < p2.getY()) {
+              return -1;
+            }
+            else {
+              return 1;
+            }
+          }
+          else if(p1.getX() < p2.getX()) {
+            return -1;
+          }
+          else {
+            return 1;
+          }
+        }
+      };
+    }
+    return lineSweepComp;
+  }
+  
+  
+  /** 
+   * Gets the points of this segment sorted left to right, top to bottom. 
+   * This is convenient for several algorithms that do computations with 
+   * line segments. 
+   */
+  public Point2D[] getSortedEndpoints() {
+    Comparator<Point2D> c = getLineSweepComparator();
+    
+    Point2D p1 = getP1();
+    Point2D p2 = getP2();
+    
+    int compare = c.compare(p1, p2);
+    if(compare <= 0) {
+      return new Point2D[] {p1, p2};
+    }
+    else {
+      return new Point2D[] {p2, p1};
+    }
+  }
+  
   //////// Intersection
   
   /** 
    * Decomposes two intersecting segments into a new sorted list of non-intersecting segments. 
+   * They are sorted from left to right, top to bottom.
    * If the segments don't intersect, a sorted list of the two segments is returned.
    */
   public static Segment2D[] breakIntersection(Segment2D s1, Segment2D s2) {
-    double[] intersection = getIntersection(s1, s2);
+    Point2D intersection = getIntersection(s1, s2);
     if(intersection != null) {
     
       // Decompose the intersecting segments and return the new sorted list of segments. 
-      Segment2D sA = new Segment2D(s1.x1, s1.y1, intersection[0], intersection[1]);
-      Segment2D sB = new Segment2D(s2.x1, s2.y1, intersection[0], intersection[1]);
+      Segment2D sA = new Segment2D(s1.x1, s1.y1, intersection.getX(), intersection.getY());
+      Segment2D sB = new Segment2D(s2.x1, s2.y1, intersection.getX(), intersection.getY());
       
-      Segment2D sC = new Segment2D(intersection[0], intersection[1], s1.x2, s1.y2);
-      Segment2D sD = new Segment2D(intersection[0], intersection[1], s2.x2, s2.y2);
+      Segment2D sC = new Segment2D(intersection.getX(), intersection.getY(), s1.x2, s1.y2);
+      Segment2D sD = new Segment2D(intersection.getX(), intersection.getY(), s2.x2, s2.y2);
       
       return new Segment2D[] {sA, sB, sD, sC};
     }
@@ -288,7 +274,7 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
    * Returns the point at which this segment intersects another segment. 
    * Returns null if they don't intersect or if they are collinear.
    */
-  public double[] getIntersection(Segment2D other) {
+  public Point2D getIntersection(Segment2D other) {
     return Segment2D.getIntersection(this, other);
   }
   
@@ -296,7 +282,7 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
    * Returns the point at which two segments intersect. 
    * Returns null if they don't intersect or if they are collinear. 
    */
-  public static double[] getIntersection(Segment2D s1, Segment2D s2) {
+  public static Point2D getIntersection(Segment2D s1, Segment2D s2) {
     
     double[] p1 = new double[] {s1.x1, s1.y1};
     double[] p2 = new double[] {s2.x1, s2.y1};
@@ -304,7 +290,7 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
     double[] v = s2.getVector();
     
     double[] bottom = GameMath.cross3D(u, v);
-    if(GameMath.isZero(bottom, TOL)) {
+    if(bottom[2] == 0) {
       // The segments are parallel.
       return null;
     }
@@ -317,7 +303,7 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
       double x = p1[0] + alpha*u[0];
       double y = p1[1] + alpha*u[1];
       
-      return new double[] {x, y};
+      return new Point2D.Double(x, y);
     }
     else {
       
@@ -329,17 +315,18 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
   
   
   /** Returns true iff the given point lies on this segment. */
-  public boolean containsPoint(double[] p) {
-    double[] u = new double[] {p[0] - x1, p[1] - y1};
+  @Override
+  public boolean contains(Point2D p) {
+    double[] u = new double[] {p.getX() - x1, p.getY() - y1};
     double[] v = getVector();
     
     // Is the segment dialogal?
-    if(Math.abs(v[0]) >= TOL && Math.abs(v[1]) >= TOL) {
+    if(v[0] != 0 && v[1] != 0) {
       
       double alphaX = u[0]/v[0];
       double alphaY = u[1]/v[1];
       
-      if(Math.abs(alphaX - alphaY) < TOL) {
+      if(alphaX - alphaY == 0) {
         return (alphaX >= 0 && alphaX <= 1);
       }
       else {
@@ -348,18 +335,18 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
     }
     
     // Is the line segment a point equivalent to p?
-    else if(Math.abs(v[0]) < TOL && Math.abs(v[1]) < TOL) {
-      return (Math.abs(u[0]) < TOL && Math.abs(u[1]) < TOL);
+    else if(v[0] == 0 && v[1] == 0) {
+      return getP1().equals(p);
     }
     
     // Are the segment and point collinear with a vertical line?
-    else if(Math.abs(v[0]) < TOL && Math.abs(u[0]) < TOL) {
+    else if(v[0] == 0 && u[0] == 0) {
       double alphaY = u[1]/v[1];
       return (alphaY >= 0 && alphaY <= 1);
     }
     
     // Are the segment and point collinear with a horizontal line?
-    else if(Math.abs(v[1]) < TOL && Math.abs(u[1]) < TOL) {
+    else if(v[1] == 0 && u[1] == 0) {
       double alphaX = u[0]/v[0];
       return (alphaX >= 0 && alphaX <= 1);
     }
@@ -371,49 +358,54 @@ public class Segment2D extends Line2D implements Comparable<Segment2D> {
   }
   
   
+  /** Returns true iff this segment shares an endpoint with another segment. */
+  public boolean sharesEndpoint(Segment2D other) {
+    Point2D p1 = this.getP1();
+    Point2D p2 = this.getP2();
+    
+    Point2D q1 = other.getP1();
+    Point2D q2 = other.getP2();
+    
+    return (p1.equals(q1) || p1.equals(q2) || p2.equals(q1) || p2.equals(q2));
+  }
+  
+  
   //////// Parallel/Collinear
   
   /** Returns true iff this segment is parellel with another segment. */
   public boolean parallel(Segment2D other) {
-    return Segment2D.parallel(this, other);
+    return Segment2D.parallel(this, other, 0.0001);
   }
   
   /** Returns true iff two segments are parallel.*/
-  public static boolean parallel(Segment2D s1, Segment2D s2) {
-  
+  public static boolean parallel(Segment2D s1, Segment2D s2, double tolerance) {
+    Point2D[] ends1 = s1.getSortedEndpoints();
+    Point2D[] ends2 = s2.getSortedEndpoints();
+    
     // The segments are effectively parallel if the angle between their vectors
     // is below our tolerance level.
-    double[] u = new double[] {s1.x2 - s1.x1, s1.y2 - s1.y1};
-    double[] v = new double[] {s2.x2 - s2.x1, s2.y2 - s2.y1};
-    return (GameMath.angle(u, v) < TOL);
+    double[] u = new double[] {ends1[1].getX() - ends1[0].getX(), ends1[1].getY() - ends1[0].getY()};
+    double[] v = new double[] {ends2[1].getX() - ends2[0].getX(), ends2[1].getY() - ends2[0].getY()};
+    return (GameMath.angle(u, v) < tolerance);
   }
   
   
   /** Returns the union of two collinear segments. Returns null if the segments aren't collinear. */
   public static Segment2D union(Segment2D s1, Segment2D s2) {
-    if(parallel(s1, s2)) {
+    if(s1.parallel(s2)) {
     
       // Get the start points sorted.
-      Segment2D sTemp;
-      if(s1.compareP1(s2) > 0) {
-        sTemp = s1;
-        s1 = s2;
-        s2 = sTemp;
-      }
-      double[] p = new double[] {s1.x1, s1.y1};
-      double[] q = new double[] {s2.x1, s2.y1};
+      List<Point2D> points = new ArrayList<>();
+      Point2D[] pq = s1.getSortedEndpoints();
+      points.add(pq[0]);
+      points.add(pq[1]);
+      Point2D[] rs = s2.getSortedEndpoints();
+      points.add(rs[0]);
+      points.add(rs[1]);
+      Collections.sort(points, getLineSweepComparator());
       
-      // Get the end points sorted.
-      if(s1.compareP2(s2) > 0) {
-        sTemp = s1;
-        s1 = s2;
-        s2 = sTemp;
-      }
-      double[] r = new double[] {s1.x2, s1.y2};
-      double[] s = new double[] {s2.x2, s2.y2};
-      
-      Segment2D ps = new Segment2D(p[0], p[1], s[0], s[1]);
-      if(ps.containsPoint(q) && ps.containsPoint(r)) {
+      Segment2D ps = new Segment2D(points.get(0), points.get(3));
+      if(ps.contains(points.get(1)) && ps.contains(points.get(2))) {
         return ps;
       }
       else {

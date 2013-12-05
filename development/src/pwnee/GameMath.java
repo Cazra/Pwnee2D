@@ -44,8 +44,8 @@ import java.awt.geom.*;
  * java.awt.Line2D, and java.awt.Point2D.
  */
 public class GameMath {
-
-   /** A conventience Random object. */
+  
+  /** A conventience Random object. */
 	public static Random rand = new Random();
 	
   //////// Angle math
@@ -374,12 +374,23 @@ public class GameMath {
   /** Returns true iff the vector is zero, given some tolerance. */
   public static boolean isZero(double[] vector, double tolerance) {
     for(int i = 0; i < vector.length; i++) {
-      if(vector[i]*vector[i] >= tolerance) {
+      if(Math.abs(vector[i]) >= tolerance) {
         return false;
       }
     }
     return true;
   }
+  
+  /** Returns true iff the vector is zero. */
+  public static boolean isZero(double[] vector) {
+    for(int i = 0; i < vector.length; i++) {
+      if(vector[i] == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   
   //////// Line/Segment math
   
