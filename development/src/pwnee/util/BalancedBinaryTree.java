@@ -28,21 +28,26 @@ package pwnee.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================*/
 
-import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /** 
- * A tree-based sorted list implemented as a Red-Black tree.
+ * A balanced binary search tree implemented as a Red-Black tree.
  * Duplicates are supported and are added towards the right.
+ * There is no guaranteed order for the removal of duplicates though.
+ *
+ * Note: This data structure is not synchronized. So if you plan to use
+ * it in a multithreaded application, you'll need to be sure to synchronize
+ * operations on it yourself.
  */
-public class BalancedBinaryTree<E extends Comparable> {
+public class BalancedBinaryTree<E extends Comparable> extends BinaryTree<E> {
   
   public static final boolean BLACK = false;
   
   public static final boolean RED = true;
-  
-  /** Used to help with removing black leaves from the tree. */
-  private static final Object curse = new Object();
   
   
   /** The root node of the tree. */
@@ -69,11 +74,77 @@ public class BalancedBinaryTree<E extends Comparable> {
   
   
   
+  //////// Size
+  
+  /** Returns the current number of elements in the tree. */
   public int size() {
     return size;
   }
   
+  /** Returns true iff this collection contains no elements. */
+  public boolean isEmpty() {
+    return (size == 0);
+  }
   
+  //////// Access
+  
+  /** Returns true iff this tree contains the given element. */
+  public boolean contains(Object o) {
+    E element = (E) o;
+    return (_searchRec(element, root) != null);
+  }
+  
+  /** Returns true iff this tree contains all the elements in the given collection. */
+  public boolean containsAll(Collection<?> c) {
+    for(Object obj : c) {
+      if(!contains(obj)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  
+  /** 
+   * Gets the node for a given element in the tree. 
+   * In the case of duplicates, it returns the first encountered node with the 
+   * element, so ordering isn't guaranteed.
+   */
+  public BinaryTreeNode<E> getNode(E element) {
+    return _searchRec(element, root);
+  }
+  
+  
+  /** Returns the root node of the tree. */
+  public BinaryTreeNode<E> getRoot() {
+    return root;
+  }
+  
+  
+  /** 
+   * Recursively searches for an element in the tree. 
+   * If the element exists, this returns the node containing the first instance 
+   * of that element encountered. 
+   * Otherwise, it returns null.
+   */
+  private RBTNode<E> _searchRec(E element, RBTNode<E> subroot) {
+    if(subroot == null) {
+      return null;
+    }
+    else {
+      int compare = compare(element, subroot.value);
+      
+      if(compare == 0) { // Found it!
+        return subroot;
+      }
+      else if (compare < 0) { // go left
+        return _searchRec(element, subroot.left);
+      }
+      else { // go right
+        return _searchRec(element, subroot.right);
+      }
+    }
+  }
   
   //////// Insertion
   
@@ -81,8 +152,9 @@ public class BalancedBinaryTree<E extends Comparable> {
   /** 
    * Inserts an element into the tree. 
    * This completes in O(logN) time.
+   * Returns true.
    */
-  public void add(E element) {
+  public boolean add(E element) {
     if(size == 0) {
       root = new RBTNode(element, BLACK);
     }
@@ -92,7 +164,21 @@ public class BalancedBinaryTree<E extends Comparable> {
     }
     
     size++;
+    return true;
   }
+  
+  
+  /** 
+   * Adds the contents of an entire collection to this tree. 
+   * Returns true.
+   */
+  public boolean addAll(Collection<? extends E> c) {
+    for(E element : c) {
+      add(element);
+    }
+    return true;
+  }
+  
   
   
   /** 
@@ -275,7 +361,9 @@ public class BalancedBinaryTree<E extends Comparable> {
   
   
   /** Removes an element from the tree. Completes in O(logN) time. */
-  public boolean remove(E element) {
+  public boolean remove(Object o) {
+    E element = (E) o;
+    
     if(size == 1) {
       if(compare(root.value, element) == 0) {
         root = null;
@@ -286,46 +374,38 @@ public class BalancedBinaryTree<E extends Comparable> {
         return false;
       }
     }
-    else if(_removeRec(element, root)) {
-      root.color = BLACK;
-      size--;
-      return true;
-    } 
     else {
-      return false;
+      RBTNode<E> node = _searchRec(element, root);
+      if(node != null) {
+        _removeNode(node);
+        root.color = BLACK;
+        size--;
+        return true;
+      }
+      else {
+        return false;
+      }
     }
   }
   
-  
-  /** 
-   * Recursively removes the element from the tree and rebalances the tree. 
-   * Returns true if the element was successfully found and removed.
-   */
-  private boolean _removeRec(E element, RBTNode<E> subroot) {
-    if(subroot == null) {
-      return false;
-    }
-    else {
-      int compare = compare(element, subroot.value);
-      
-      if(compare == 0) { // found leftmost instance? 
-        RBTNode<E> prev = _findPrev(subroot);
-        if(prev == null || compare(prev.value, element) < 0) { // stop here and remove.
-          _removeNode(subroot);
-          return true;
-        }
-        else { // not the leftmost instance. Go left.
-          return _removeRec(element, prev);
-        }
-      }
-      else if (compare < 0) { // go left
-        return _removeRec(element, subroot.left);
-      }
-      else { // go right
-        return _removeRec(element, subroot.right);
+  /** Removes all the elements from this tree that are also contained in the specified collection. */
+  public boolean removeAll(Collection<?> c) {
+    boolean hasChanged = false;
+    for(Object o : c) {
+      if(remove(o)) {
+        hasChanged = true;
       }
     }
+    return hasChanged;
   }
+  
+  
+  /** Removes the root element from the tree. */
+  public void removeRoot() {
+    remove(root.value);
+  }
+  
+  
   
   
   /** 
@@ -338,13 +418,13 @@ public class BalancedBinaryTree<E extends Comparable> {
     RBTNode<E> right = node.right;
     
     // For the case where we have left and right children, 
-    // replace the subroot's value with the value of the previous in-order node
-    // and then remove that previous node instead.
+    // replace the subroot's value with the value of the rightmost node 
+    // in the left branch and then remove that node instead.
     if(left != null && right != null) {
       
-      RBTNode<E> prev = _findPrev(node);
-      node.value = prev.value;
-      _removeNode(prev);
+      RBTNode<E> remNode = _getRightmostInLeftBranch(node);
+      node.value = remNode.value;
+      _removeNode(remNode);
     }
     
     // Cases with only 1 child.
@@ -382,10 +462,10 @@ public class BalancedBinaryTree<E extends Comparable> {
     RBTNode<E> parent = node.parent;
     if(parent == null) {
       node.color = BLACK;
-      root = node;
+      _setRoot(node);
     }
     else {
-      RBTNode<E> sibling = node.getSibling();
+      RBTNode<E> sibling = (RBTNode<E>) node.getSibling();
       boolean topColor = parent.color;
       RBTNode<E> grandparent = parent.parent;
       boolean isLeft = parent.isLeftChild();
@@ -432,8 +512,7 @@ public class BalancedBinaryTree<E extends Comparable> {
         }
         
         if(grandparent == null) {
-          newsubroot.remove();
-          root = newsubroot;
+          _setRoot(newsubroot);
         }
         else {
           grandparent.setChild(newsubroot, isLeft);
@@ -478,8 +557,7 @@ public class BalancedBinaryTree<E extends Comparable> {
         
         // reassign the subroot.
         if(grandparent == null) {
-          newsubroot.remove();
-          root = newsubroot;
+          _setRoot(newsubroot);
         }
         else {
           grandparent.setChild(newsubroot, isLeft);
@@ -500,7 +578,7 @@ public class BalancedBinaryTree<E extends Comparable> {
     
     if(parent == null) {
       node.remove();
-      setRoot(other);
+      _setRoot(other);
     }
     else {
       boolean isLeft = node.isLeftChild();
@@ -509,19 +587,18 @@ public class BalancedBinaryTree<E extends Comparable> {
     }
   }
   
-  
-  private void setRoot(RBTNode<E> node) {
+  /** Changes the root node of the tree. */
+  private void _setRoot(RBTNode<E> node) {
     root = node;
     root.remove();
   }
   
-  //////// Find nodes in-order
+  //////// Tree traversal
   
   /** 
-   * Finds the node that comes before the given node, in order. 
-   * That is, the rightmost node in its left branch.
+   * Finds the rightmost node in the left branch of a subtree root.
    */
-  private RBTNode<E> _findPrev(RBTNode<E> node) {
+  private RBTNode<E> _getRightmostInLeftBranch(RBTNode<E> node) {
     RBTNode<E> prev = node.left;
     if(prev == null) {
       return null;
@@ -532,6 +609,39 @@ public class BalancedBinaryTree<E extends Comparable> {
     }
     
     return prev;
+  }
+  
+  
+  /** Returns an iterator to perform an in-order traversal over the tree. */
+  public Iterator<E> iterator() {
+    return new BinaryTreeIterator(this);
+  }
+  
+  
+  //////// Filtering
+  
+  
+  /** 
+   * Removes all the elments in this tree which are not also in 
+   * the specified collection. 
+   * The completion time for this method is not guaranteed, as it depends on
+   * the completion time for the specified collection's contains(Object) method.
+   */
+  public boolean retainAll(Collection<?> c) {
+    List<E> removeable = new ArrayList<>();
+    
+    for(E element : this) {
+      if(!c.contains(element)) {
+        removeable.add(element);
+      }
+    }
+    
+    boolean hasChanged = false;
+    for(E element : removeable) {
+      this.remove(element);
+      hasChanged = true;
+    }
+    return hasChanged;
   }
   
   
@@ -550,6 +660,41 @@ public class BalancedBinaryTree<E extends Comparable> {
     }
   }
   
+  
+  //////// Array representation
+  
+  /** Returns an array containing all the elements of this collection, in order. */
+  public Object[] toArray() {
+    Object[] result = new Object[size];
+    int index = 0;
+    for(E element : this) {
+      result[index] = element;
+      index++;
+    }
+    return result;
+  }
+  
+  /** Returns an array containing all the elements of this collection, in order. */
+  @SuppressWarnings("unchecked")
+  public <T> T[] toArray(T[] a) {
+    if(a.length < size) {
+      a = (T[])java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+    }
+    
+    int i = 0;
+    Object[] result = a;
+    for(E element : this) {
+      result[i++] = element;
+    }
+    
+    if(a.length > size) {
+      a[size] = null;
+    }
+    
+    return a;
+  }
+  
+  
   //////// Rendering
   
   public String toString() {
@@ -559,6 +704,7 @@ public class BalancedBinaryTree<E extends Comparable> {
   
   /////// Testing
   
+  /** Creates a random tree of Doubles with 10 elements. */
   public static BalancedBinaryTree<Double> randomTree() {
     BalancedBinaryTree<Double> tree = new BalancedBinaryTree<>();
     for(int i = 0; i < 10; i++) {
@@ -566,24 +712,74 @@ public class BalancedBinaryTree<E extends Comparable> {
     }
     return tree;
   }
+  
+  
+  /** 
+   * Creates a tree with 1000 nodes, then removes all the nodes. 
+   * If this was successful, it prints "success". Otherwise, it prints "fail". 
+   */
+  public static void test() {
+    int size = 1000;
+    int numTests = 1000;
+    
+    for(int j = 0; j < numTests; j++) {
+      BalancedBinaryTree<Double> tree = new BalancedBinaryTree<>();
+      for(int i = 0; i < size; i++) {
+        tree.add((double) (new java.util.Random()).nextInt(1000));
+      }
+      
+      for(int i = 0; i < size; i++) {
+        tree.removeRoot();
+      }
+      
+      if(tree.size() == 0) {
+        System.out.println("success");
+      }
+      else {
+        System.out.println("fail");
+        break;
+      }
+    }
+  }
+  
+  /** Performs a smaller test which shows the updates to the tree. */
+  public static void test2() {
+    BalancedBinaryTree<Double> tree = new BalancedBinaryTree<>();
+    for(int i = 0; i < 10; i++) {
+      tree.add((double) (new java.util.Random()).nextInt(100));
+    }
+    
+    System.out.println(tree + "\n");
+    for(int i = 0; i < 10; i++) {
+      tree.removeRoot();
+      System.out.println(tree + "\n");
+    }
+    
+    if(tree.size() == 0) {
+        System.out.println("success");
+      }
+      else {
+        System.out.println("fail");
+      }
+  }
 }
 
 
 /** A node in a red-black binary tree. */
-class RBTNode<E extends Comparable> {
+class RBTNode<E extends Comparable> extends BinaryTreeNode<E> {
 
-  public boolean color;
+  protected boolean color;
   
-  public E value;
+  protected E value;
   
-  public RBTNode<E> parent;
+  protected RBTNode<E> parent;
   
-  public RBTNode<E> left;
+  protected RBTNode<E> left;
   
-  public RBTNode<E> right;
+  protected RBTNode<E> right;
   
   
-  public RBTNode(E value, boolean color) {
+  protected RBTNode(E value, boolean color) {
     this.value = value;
     this.color = color;
     
@@ -591,6 +787,28 @@ class RBTNode<E extends Comparable> {
     right = null;
     parent = null;
   }
+  
+  
+  /** Returns the value contained at this node. */
+  public E getValue() {
+    return value;
+  }
+  
+  /** Returns the left child of this node. */
+  public BinaryTreeNode<E> getLeft() {
+    return left;
+  }
+  
+  /** Returns the right child of this node. */
+  public BinaryTreeNode<E> getRight() {
+    return right;
+  }
+  
+  /** Returns the parent of this node. */
+  public BinaryTreeNode<E> getParent() {
+    return parent;
+  }
+  
   
   
   public String toString() {
@@ -608,7 +826,7 @@ class RBTNode<E extends Comparable> {
   }
   
   
-  public void setLeft(RBTNode<E> left) {
+  protected void setLeft(RBTNode<E> left) {
     // Sever the existing left. 
     if(this.left != null) {
       this.left.remove();
@@ -623,7 +841,7 @@ class RBTNode<E extends Comparable> {
   
   
   
-  public void setRight(RBTNode<E> right) {
+  protected void setRight(RBTNode<E> right) {
     // Sever the existing right. 
     if(this.right != null) {
       this.right.remove();
@@ -637,7 +855,7 @@ class RBTNode<E extends Comparable> {
   }
   
   
-  public void setChild(RBTNode<E> child, boolean leftElseRight) {
+  protected void setChild(RBTNode<E> child, boolean leftElseRight) {
     if(leftElseRight) {
       setLeft(child);
     }
@@ -647,43 +865,15 @@ class RBTNode<E extends Comparable> {
   }
   
   
-  public void setParent(RBTNode<E> parent) {
+  protected void setParent(RBTNode<E> parent) {
     remove();
     this.parent = parent;
   }
   
   
   
-  public RBTNode<E> getSibling() {
-    if(isLeftChild()) {
-      return parent.right;
-    }
-    else if(isRightChild()) {
-      return parent.left;
-    }
-    else {
-      return null;
-    }
-  }
-  
-  
-  public boolean isRoot() {
-    return (parent == null);
-  }
-  
-  
-  /** Is this node the left child of its parent? */
-  public boolean isLeftChild() {
-    return (parent != null && parent.left == this);
-  }
-  
-  /** Is this node the right child of its parent? */
-  public boolean isRightChild() {
-    return (parent != null && parent.right == this);
-  }
-  
   /** Removes this node from its parent. */
-  public void remove() {
+  protected void remove() {
     if(isLeftChild()) {
       parent.left = null;
     }
@@ -697,7 +887,7 @@ class RBTNode<E extends Comparable> {
   //////// Child color count
   
   /** Returns a count of this node's red children. */
-  public int countRedChildren() {
+  protected int countRedChildren() {
     int result = 0;
     if(left != null && left.color == BalancedBinaryTree.RED) {
       result++;
@@ -708,8 +898,8 @@ class RBTNode<E extends Comparable> {
     return result;
   }
   
-  /** Returns a count of this node's black children. Null children count as black. */
-  public int countBlackChildren() {
+  /** Returns a count of this node's black children. Null children count as black dummy nodes. */
+  protected int countBlackChildren() {
     int result = 0;
     if(left == null || left.color == BalancedBinaryTree.BLACK) {
       result++;
@@ -725,7 +915,7 @@ class RBTNode<E extends Comparable> {
   
   
   /** Rotates the subtree at this node to the left. Returns the new subroot. */
-  public RBTNode<E> rotateLeft() {
+  protected RBTNode<E> rotateLeft() {
     RBTNode<E> left = this.left;
     RBTNode<E> right = this.right;
     
@@ -742,7 +932,7 @@ class RBTNode<E extends Comparable> {
   }
   
   /** Rotates the subtree at this node to the right. Returns the new subroot. */
-  public RBTNode<E>  rotateRight() {
+  protected RBTNode<E>  rotateRight() {
     RBTNode<E> left = this.left;
     RBTNode<E> right = this.right;
     
@@ -759,3 +949,6 @@ class RBTNode<E extends Comparable> {
   }
   
 }
+
+
+
