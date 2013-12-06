@@ -69,7 +69,9 @@ public class BalancedBinaryTree<E extends Comparable> {
   
   
   
-  
+  public int size() {
+    return size;
+  }
   
   
   
@@ -274,7 +276,17 @@ public class BalancedBinaryTree<E extends Comparable> {
   
   /** Removes an element from the tree. Completes in O(logN) time. */
   public boolean remove(E element) {
-    if(_removeRec(element, root)) {
+    if(size == 1) {
+      if(compare(root.value, element) == 0) {
+        root = null;
+        size--;
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if(_removeRec(element, root)) {
       root.color = BLACK;
       size--;
       return true;
@@ -375,7 +387,7 @@ public class BalancedBinaryTree<E extends Comparable> {
     else {
       RBTNode<E> sibling = node.getSibling();
       boolean topColor = parent.color;
-      RBTNode<E> grandparent = node.parent;
+      RBTNode<E> grandparent = parent.parent;
       boolean isLeft = parent.isLeftChild();
       
       // Case 1: black sibling with at least 1 red child. Restructure.
@@ -493,12 +505,7 @@ public class BalancedBinaryTree<E extends Comparable> {
     else {
       boolean isLeft = node.isLeftChild();
       node.remove();
-      if(isLeft) {
-        parent.setLeft(other);
-      }
-      else {
-        parent.setRight(other);
-      }
+      parent.setChild(other, isLeft);
     }
   }
   
@@ -719,8 +726,6 @@ class RBTNode<E extends Comparable> {
   
   /** Rotates the subtree at this node to the left. Returns the new subroot. */
   public RBTNode<E> rotateLeft() {
-    boolean isLeft = isLeftChild();
-    
     RBTNode<E> left = this.left;
     RBTNode<E> right = this.right;
     
@@ -738,8 +743,6 @@ class RBTNode<E extends Comparable> {
   
   /** Rotates the subtree at this node to the right. Returns the new subroot. */
   public RBTNode<E>  rotateRight() {
-    boolean isLeft = isLeftChild();
-    
     RBTNode<E> left = this.left;
     RBTNode<E> right = this.right;
     
