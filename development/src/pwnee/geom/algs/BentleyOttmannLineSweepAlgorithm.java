@@ -69,6 +69,7 @@ public class BentleyOttmannLineSweepAlgorithm {
   }
   
   
+  /** This actually runs the algorithm. */
   private Set<Point2D> run(Set<Line2D> segments) {
     
     // Populate our event queue with the segment endpoints.
@@ -110,6 +111,7 @@ public class BentleyOttmannLineSweepAlgorithm {
       else if(e instanceof SweepIntersection) {
         SweepIntersection intersection = (SweepIntersection) e;
         
+        // Process an intersection between any two segments only once.
         if(!visited.contains(intersection)) {
           visited.add(intersection);
           
@@ -121,6 +123,7 @@ public class BentleyOttmannLineSweepAlgorithm {
           SweepLeft newLower = new SweepLeft(intersection.point, new Line2D.Double(intersection.point, intersection.upperLeft.right));
           newLower.setRight(intersection.upperLeft.right);
           
+          // Add the adjusted segments back into the event queue.
           eventQueue.add(newUpper);
           eventQueue.add(newLower);
         }
@@ -131,6 +134,8 @@ public class BentleyOttmannLineSweepAlgorithm {
     return result;
   }
   
+  
+  /** A comparator that compares line sweep events in ascending Y order of their endpoints. */
   private static Comparator<SweepLeft> sweepComp = null;
   
   private static Comparator<SweepLeft> getSweepComparator() {
@@ -190,11 +195,14 @@ public class BentleyOttmannLineSweepAlgorithm {
 }
 
 
+
+/** A SweepEvent is used to represent parts of a line segment during the linesweep algorithm. */
 abstract class SweepEvent extends Point2D implements Comparable<SweepEvent> {
   
   /** The endpoint this event represents. */
   public Point2D point;
   
+  /** The line segment the point of this event belongs to. */
   public Line2D segment;
   
   public SweepEvent(Point2D point, Line2D segment) {
@@ -202,6 +210,7 @@ abstract class SweepEvent extends Point2D implements Comparable<SweepEvent> {
     this.segment = segment;
   }
   
+  /** Constructs the SweepEvents for the "left" and "right" endpoints of a line segment. */
   public static SweepEvent[] createEvents(Line2D segment) {
     Point2D p1 = segment.getP1();
     Point2D p2 = segment.getP2();
@@ -221,7 +230,7 @@ abstract class SweepEvent extends Point2D implements Comparable<SweepEvent> {
     return new SweepEvent[] {left, right};
   }
   
-  
+  //////// Point2D implementation
   public double getX() {
     return point.getX();
   }
@@ -245,6 +254,12 @@ abstract class SweepEvent extends Point2D implements Comparable<SweepEvent> {
   }
   
   
+  //////// Comparable implementation
+  
+  /** 
+   * SweepEvents are naturally compared by their points in ascending XY order. 
+   * For ties, SweepLefts take priority, followed by SweepIntersections, then SweepRights.
+   */
   public int compareTo(SweepEvent other) {
     int compare = GameMath.getXYComparator().compare(this, other);
     if(compare == 0) {
@@ -267,12 +282,16 @@ abstract class SweepEvent extends Point2D implements Comparable<SweepEvent> {
   }
   
   
+  //////// Abstract methods
+  
+  /** Returns the priority for this event type in case of a tie during a compareTo. */
   public abstract int getPriority();
 } 
 
 /** An event representing the "left" endpoint of a segment. */
 class SweepLeft extends SweepEvent {
   
+  /** The corresponding right endpoint for the event's segment. */
   public SweepRight right;
   
   public SweepLeft(Point2D point, Line2D segment) {
@@ -284,6 +303,7 @@ class SweepLeft extends SweepEvent {
     right.left = this;
   }
   
+  /** SweepLefts have best priority. */
   public int getPriority() {
     return 1;
   }
@@ -292,6 +312,7 @@ class SweepLeft extends SweepEvent {
 /** An event representing the "right" endpoint of a segment. */
 class SweepRight extends SweepEvent {
   
+  /** The corresponding left endpoint for the event's segment. */
   public SweepLeft left;
   
   public SweepRight(Point2D point, Line2D segment) {
@@ -303,6 +324,7 @@ class SweepRight extends SweepEvent {
     left.right = this;
   }
   
+  /** SweepRights have least priority. */
   public int getPriority() {
     return 3;
   }
@@ -312,12 +334,21 @@ class SweepRight extends SweepEvent {
 /** An event representing an intersection between two segments. */
 class SweepIntersection extends SweepEvent {
   
+  /** The other segment the point at this event belongs to. */
   public Line2D segment2;
   
+  /** The left endpoint for the upper segment to the left of the intersection.*/
   public SweepLeft upperLeft;
   
+  /** The left endpoint for the lower segment to the left of the intersection. */
   public SweepLeft lowerLeft;
   
+  
+  /** 
+   * Constructs the intersection event given the point of intersection and 
+   * the events for the left endpoints of the segments forming the 
+   * intersection.
+   */
   public SweepIntersection(Point2D point, SweepLeft upperLeft, SweepLeft lowerLeft) {
     super(point, upperLeft.segment);
     this.upperLeft = upperLeft;
@@ -345,11 +376,13 @@ class SweepIntersection extends SweepEvent {
   }
   
   
+  /** Two lines are equal if they share the same endpoints. Here, we don't care about the order. */
   private boolean linesEqual(Line2D line1, Line2D line2) {
     return ((line1.getP1().equals(line2.getP1()) && line1.getP2().equals(line2.getP2())) || 
             (line1.getP1().equals(line2.getP2()) && line1.getP2().equals(line2.getP1())));
   }
   
+  /** SweepIntersections have middle priority. */
   public int getPriority() {
     return 2;
   }
