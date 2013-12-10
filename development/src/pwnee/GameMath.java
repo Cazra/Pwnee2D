@@ -28,6 +28,7 @@ package pwnee;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================*/
 
+import java.util.Comparator;
 import java.util.Random;
 import java.awt.geom.*;
 
@@ -81,12 +82,7 @@ public class GameMath {
 			angle += 360;
 		return Math.cos(d2r(degrees));
 	}
-	
-  
-  /** Clamps some value between the given inclusive range. */
-  public static double clamp(double value, double min, double max) {
-    return Math.min(1, Math.max(0, value));
-  }
+
 	
 	/** 
    * Returns the angle in degrees from one point to another, 
@@ -140,6 +136,94 @@ public class GameMath {
     return src;
   }
 	
+  
+  
+  
+  //////// Ranges
+  
+  /** Clamps some value to be in the range [min, max]. */
+  public static double clamp(double value, double min, double max) {
+    return Math.min(1, Math.max(0, value));
+  }
+  
+  /** Clamps some value to be in the range [0, 1]. */
+  public static double clamp(double value) {
+    return clamp(value, 0, 1);
+  }
+  
+  
+  /** Wraps some value to be in the range [min, max). */
+  public static double wrap(double value, double min, double max) {
+    double diff = max - min;
+    double result = value % diff;
+    if(result < 0) {
+      result += diff;
+    }
+    result += min;
+    return result;
+  }
+  
+  /** Wraps some value to be in the range [0, 1). */
+  public static double wrap(double value) {
+    return wrap(value, 0, 1);
+  }
+  
+  /** Wraps some value to be in the range [0, max). */
+  public static double wrap(double value, double max) {
+    return wrap(value, 0, max);
+  }
+  
+  
+  //////// Array wrapping
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, Object[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, byte[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, short[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, int[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, long[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, float[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, double[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  public static int wrap(int index, boolean[] arr) {
+    return arrWrap(index, arr.length);
+  }
+  
+  /** Wraps some index to be within an the range for an array. */
+  private static int arrWrap(int index, int size) {
+    index = index % size;
+    if(index < 0) {
+      index += size;
+    }
+    return index;
+  }
   
   
   //////// Distance math
@@ -197,6 +281,9 @@ public class GameMath {
       return Math.sqrt(sqLen);
     }
   }
+  
+  
+  
   
   //////// Vector math
   
@@ -392,8 +479,8 @@ public class GameMath {
   }
   
   
-  //////// Line/Segment math
   
+  //////// Line-Line math
   
   /** 
    * Computes the point at which two infinitely stretching, 2D, straight 
@@ -441,6 +528,167 @@ public class GameMath {
   }
   
   
+  /** 
+   * Finds the point of intersection between two line segments. 
+   * Returns null if the segments don't intersect. 
+   */
+  public static Point2D segIntersection(double px, double py, double qx, double qy, double rx, double ry, double sx, double sy) {
+    
+    double[] p = new double[] {px, py};
+    double[] r = new double[] {rx, ry};
+    double[] u = new double[] {qx - px, qy - py};
+    double[] v = new double[] {sx - rx, sy - ry};
+    
+    // compute the parametric scalar for our first line.
+    double[] bottom = GameMath.cross3D(u, v);
+    if(bottom[2] == 0) {
+      // The segments are parallel.
+      return null;
+    }
+    double[] top = GameMath.cross3D(GameMath.sub(r, p), v);
+    double alpha = top[2]/bottom[2];
+    
+    // Compute the potential point of intersection.
+    double x = p[0] + alpha*u[0];
+    double y = p[1] + alpha*u[1];
+    
+    // compute the parametric scalar for our second line.
+    double beta;
+    if(v[0] != 0) {
+      beta = (x - rx)/v[0];
+    }
+    else {
+      beta = (y - ry)/v[1];
+    }
+    
+    // The segments intersect if both alpha and beta lie in the range [0,1].
+    if(alpha >= 0 && alpha <= 1 && beta >= 0 && beta <= 1) {
+      return new Point2D.Double(x, y);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  /** 
+   * Finds the point of intersection between two line segments. 
+   * Returns null if the segments don't intersect. 
+   */
+  public static Point2D segIntersection(Line2D line1, Line2D line2) {
+    return segIntersection(line1.getX1(), line1.getY1(), line1.getX2(), line1.getY2(),
+                           line2.getX1(), line2.getY1(), line2.getX2(), line2.getY2());
+  }
+  
+  
+  /** 
+   * Returns true iff the given lines are effectively parallel 
+   * within some tolerance. 
+   */
+  public static boolean parallel(double px, double py, double qx, double qy, double rx, double ry, double sx, double sy, double tolerance) {
+    double[] u = new double[] {qx - px, qy - py};
+    double[] v = new double[] {sx - rx, sy - ry};
+    
+    return (angleR(u, v) < tolerance);
+  }
+  
+  /** 
+   * Returns true iff the given lines are effectively parallel 
+   * within some tolerance. 
+   */
+  public static boolean parallel(Line2D line1, Line2D line2, double tolerance) {
+    return parallel(line1.getX1(), line1.getY1(), line1.getX2(), line1.getY2(),
+                    line2.getX1(), line2.getY1(), line2.getX2(), line2.getY2(),
+                    tolerance);
+  }
+  
+  
+  /** 
+   * Returns true iff the given lines are effectively parallel within a 
+   * tolerance of 0.0001.
+   */
+  public static boolean parallel(double px, double py, double qx, double qy, double rx, double ry, double sx, double sy) {
+    return parallel(px, py, qx, qy,
+                    rx, ry, sx, sy,
+                    0.0001);
+  }
+  
+  /** 
+   * Returns true iff the given lines are effectively parallel within a 
+   * tolerance of 0.0001.
+   */
+  public static boolean parallel(Line2D line1, Line2D line2) {
+    return parallel(line1.getX1(), line1.getY1(), line1.getX2(), line1.getY2(),
+                    line2.getX1(), line2.getY1(), line2.getX2(), line2.getY2());
+  }
+  
+  
+  
+  public double[] toVector(Line2D line) {
+    return new double[] {line.getX2() - line.getX1(), line.getY2() - line.getY1(), 0, 0};
+  }
+  
+  public double[] toVector(Point2D p) {
+    return new double[] {p.getX(), p.getY(), 0, 1};
+  }
+  
+  
+  //////// Point-Line math
+  
+  /** 
+   * Determines whether some point lies above a line in the default  
+   * Java 2D coordinate system. 
+   * If the system is rotated such that the line's vector points in the 
+   * positive x axis direction, this method returns true if the given point
+   * in the rotated system is above the line (that is, it's y position is less 
+   * than the horizontal y position of the line). 
+   * Otherwise, it returns false.
+   */
+  public static boolean isPointAboveLine(double px, double py, double x1, double y1, double x2, double y2) {
+    return (Line2D.relativeCCW(x1, y1, x2, y2, px, py) > 0);
+  }
+  
+  public static boolean isPointAboveLine(Point2D p, double x1, double y1, double x2, double y2) {
+    return isPointAboveLine(p.getX(), p.getY(), x1, y1, x2, y2);
+  }
+  
+  public static boolean isPointAboveLine(Point2D p, Line2D line) {
+    return (line.relativeCCW(p) > 0);
+  }
+  
+  /** 
+   * Determines whether some point lies below a line in the default 
+   * Java 2D coordinate system.
+   * See isPointAboveLine.
+   */
+  public static boolean isPointBelowLine(double px, double py, double x1, double y1, double x2, double y2) {
+    return (Line2D.relativeCCW(x1, y1, x2, y2, px, py) < 0);
+  }
+  
+  public static boolean isPointBelowLine(Point2D p, double x1, double y1, double x2, double y2) {
+    return isPointBelowLine(p.getX(), p.getY(), x1, y1, x2, y2);
+  }
+  
+  public static boolean isPointBelowLine(Point2D p, Line2D line) {
+    return (line.relativeCCW(p) < 0);
+  }
+  
+  /** Returns the distance of a point to a line extending infinitely in two directions. */
+  public static double distToLine(double px, double py, double x1, double y1, double x2, double y2) {
+    return Line2D.ptLineDist(x1, y1, x2, y2, px, py);
+  }
+  
+  public static double distToLine(Point2D p, Line2D line) {
+    return distToLine(p.getX(), p.getY(), line.getX1(), line.getY1(), line.getX2(), line.getY2());
+  }
+  
+  /** Returns the distance of a point to a line segment. */
+  public static double distToSegment(double px, double py, double x1, double y1, double x2, double y2) {
+    return Line2D.ptSegDist(x1, y1, x2, y2, px, py);
+  }
+  
+  public static double distToSegment(Point2D p, Line2D line) {
+    return distToSegment(p.getX(), p.getY(), line.getX1(), line.getY1(), line.getX2(), line.getY2());
+  }
   
   
   //////// java.lang.Math reimplementations
@@ -467,6 +715,90 @@ public class GameMath {
     }
     
     return result;
+  }
+  
+  
+  //////// Comparators
+  
+  private static Comparator<Point2D> xyComp = null;
+  
+  /** 
+   * Returns a Comparator that compares points first in ascending X order, 
+   * then in ascending Y order.
+   */
+  public static Comparator<Point2D> getXYComparator() {
+    if(xyComp == null) {
+      xyComp = new Comparator<Point2D>() {
+        
+        public int compare(Point2D p1, Point2D p2) {
+          if(p1.getX() < p2.getX()) {
+            return -1;
+          }
+          else if(p1.getX() > p2.getX()) {
+            return 1;
+          }
+          else {
+            if(p1.getY() < p2.getY()) {
+              return -1;
+            }
+            else if(p1.getY() > p2.getY()) {
+              return 1;
+            }
+            else {
+              return 0;
+            }
+          }
+        }
+      };
+    }
+    return xyComp;
+  }
+  
+  
+  
+  private static Comparator<Point2D> xComp = null;
+  
+  /** Returns a Comparator that compares points in ascending X order. */
+  public static Comparator<Point2D> getXComparator() {
+    if(xComp == null) {
+      xComp = new Comparator<Point2D>() {
+        public int compare(Point2D p1, Point2D p2) {
+          if(p1.getX() < p2.getX()) {
+            return -1;
+          }
+          else if(p1.getX() > p2.getX()) {
+            return 1;
+          }
+          else {
+            return 0;
+          }
+        }
+      };
+    }
+    return xComp;
+  }
+  
+  
+  private static Comparator<Point2D> yComp = null;
+  
+  /** Returns a Comparator that compares points in ascending Y order. */
+  public static Comparator<Point2D> getYComparator() {
+    if(yComp == null) {
+      yComp = new Comparator<Point2D>() {
+        public int compare(Point2D p1, Point2D p2) {
+          if(p1.getY() < p2.getY()) {
+            return -1;
+          }
+          else if(p1.getY() > p2.getY()) {
+            return 1;
+          }
+          else {
+            return 0;
+          }
+        }
+      };
+    }
+    return yComp;
   }
 }
 

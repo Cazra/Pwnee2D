@@ -86,7 +86,7 @@ public class Polygon2D { // implements Shape {
   
   /** Returns the vertex in the polygon with the specified index. */
   public Point2D getPoint(int index) {
-    index = nIndex(index);
+    index = GameMath.wrap(index, x);
     return new Point2D.Double(x[index], y[index]);
   }
   
@@ -99,15 +99,6 @@ public class Polygon2D { // implements Shape {
     }
     
     return points;
-  }
-  
-  /** Wraps a pointIndex to be within our array bounds. */
-  private int nIndex(int pointIndex) {
-    pointIndex = pointIndex % size();
-    if(pointIndex < 0) {
-      pointIndex += size();
-    }
-    return pointIndex;
   }
   
   
@@ -165,6 +156,8 @@ public class Polygon2D { // implements Shape {
   public boolean intersects(Polygon2D other) {
     
     // Use the Separating Axis Theorem to determine if there is an intersection. 
+    // The polygons intersect if none of the two polygon's segments could be 
+    // used as separating axes.
     return !(this.halfSAT(other) || other.halfSAT(this));
   }
   
@@ -181,13 +174,25 @@ public class Polygon2D { // implements Shape {
   
   /** 
    * Return true if there is a tangent line on one of this poly's segments 
-   * such that that line separates all the points of both polygons.
-   * Right now this only works if the points are specified in clockwise order (in game geometry).
+   * such that that line separates all the points of both polygons. 
+   * Right now this only works if the points are specified in clockwise order 
+   * (in game geometry).
    */
   private boolean halfSAT(Polygon2D other) {
     
-    // All the points in the other polygon will be "above" all the segments if the vertices were specified in ccw order. 
+    // All the points in the other polygon will be "above" all the segments 
+    // if the vertices were specified in ccw order. 
     int numPoints = size();
+    
+    // The point will be "below" all the segments if the vertices were 
+    // specified in cw order.
+    boolean underAll = true; 
+    
+    // The point will be "above" all the segments if the vertices were 
+    // specified in ccw order. 
+    boolean aboveAll = true; 
+    
+    // Iterate over this polygon's segments. 
     for(int j = 0; j < numPoints; j++) {
       // segment start and end points.
       double sx = this.x[j];
@@ -195,8 +200,10 @@ public class Polygon2D { // implements Shape {
       double ex = this.x[(j+1) % numPoints];
       double ey = this.y[(j+1) % numPoints];
       
-      // return false early if there is a separating axis.
       boolean sepAxis = true;
+      
+      // Move on to next segment if we determine that the current segment 
+      // can't be a separating axis.
       for(int i = 0; i < other.size(); i++) {
         Point2D pt = other.getPoint(i);
         int relCCW = Line2D.relativeCCW(sx, sy, ex, ey, pt.getX(), pt.getY());
@@ -205,12 +212,16 @@ public class Polygon2D { // implements Shape {
           break;
         }
       }
+      
+      // Return true immediately if the current segment has been found to be a
+      // separating axis.
       if(sepAxis) {
         return true;
       }
       
     }
     
+    // None of this polygon's segments could be used as separating axes.
     return false;
   }
   
@@ -219,12 +230,12 @@ public class Polygon2D { // implements Shape {
   /** 
    * Returns the set of line segments representing this polygon in no particular order. 
    */
-  public Set<Segment2D> getSegments() {
-    Set<Segment2D> result = new HashSet<>();
+  public Set<Line2D> getSegments() {
+    Set<Line2D> result = new HashSet<>();
     
     for(int i = 0; i < x.length; i++) {
-      int next = nIndex(i+1);
-      result.add(new Segment2D(x[i], y[i], x[next], y[next]));
+      int next = GameMath.wrap(i+1, x);
+      result.add(new Line2D.Double(x[i], y[i], x[next], y[next]));
     }
     
     return result;
@@ -232,10 +243,33 @@ public class Polygon2D { // implements Shape {
   
   
   /** Returns the set of points at which two polygons intersect. */
-  public static Set<Point2D> getIntersectionPoints(Polygon2D p1, Polygon2D p2) {
-    return null; // BentleyOttmannLineSweepAlgorithm.lineSweep(p1.getSegments(), p2.getSegments());
+  public static Set<Point2D> getIntersections(Polygon2D p1, Polygon2D p2) {
+    
+    // Create the set of all the segments in the two polygons.
+    Set<Line2D> segments = p1.getSegments();
+    segments.addAll(p2.getSegments());
+    
+    // Find the set of intersections among the set of segments.
+    Set<Point2D> vertices = BentleyOttmannLineSweepAlgorithm.getIntersections(segments);
+    
+    // only keep vertices that are either present in both or neither polygon.
+    Set<Point2D> result = new HashSet<>();
+    Set<Point2D> p1Points = new HashSet<>(p1.getPoints());
+    Set<Point2D> p2Points = new HashSet<>(p2.getPoints());
+    for(Point2D vertex : vertices) {
+      boolean p1Contains = p1Points.contains(vertex);
+      boolean p2Contains = p2Points.contains(vertex);
+      
+      if((p1Contains && p2Contains) || (!p1Contains && !p2Contains)) {
+        result.add(vertex);
+      }
+    }
+    return result;
   }
   
+  public Set<Point2D> getIntersections(Polygon2D other) {
+    return getIntersections(this, other);
+  }
   
   
   //////// Transforming the polygon. 
