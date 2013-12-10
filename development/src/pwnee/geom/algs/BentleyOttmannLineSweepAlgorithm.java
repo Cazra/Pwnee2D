@@ -61,6 +61,8 @@ public class BentleyOttmannLineSweepAlgorithm {
     sweepLine = new BalancedBinaryTree(getSweepComparator());
   }
   
+  
+  /** Returns the set of intersection points for a set of line segments in O(N*logN) time. */
   public static Set<Point2D> getIntersections(Set<Line2D> segments) {
     BentleyOttmannLineSweepAlgorithm algorithm = new BentleyOttmannLineSweepAlgorithm();
     return algorithm.run(segments);

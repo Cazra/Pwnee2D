@@ -691,6 +691,23 @@ public class GameMath {
   }
   
   
+  /** 
+   * Bisects a line segment at the given point, given some tolerance for 
+   * how close that point can be to the line. 
+   * Returns null if the point could not bisect the line.
+   */
+  public static Line2D[] bisectSegmentAt(Point2D p, Line2D line, double tolerance) {
+    if(distToSegment(p, line) < tolerance) {
+      Line2D b1 = new Line2D.Double(line.getP1(), p);
+      Line2D b2 = new Line2D.Double(p, line.getP2());
+      return new Line2D[] {b1, b2};
+    }
+    else {
+      return null;
+    }
+  }
+  
+  
   //////// java.lang.Math reimplementations
   
   /** 

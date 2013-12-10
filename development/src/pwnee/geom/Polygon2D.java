@@ -102,6 +102,21 @@ public class Polygon2D { // implements Shape {
   }
   
   
+  /** 
+   * Returns the set of line segments representing this polygon in no particular order. 
+   */
+  public Set<Line2D> getSegments() {
+    Set<Line2D> result = new HashSet<>();
+    
+    for(int i = 0; i < x.length; i++) {
+      int next = GameMath.wrap(i+1, x);
+      result.add(new Line2D.Double(x[i], y[i], x[next], y[next]));
+    }
+    
+    return result;
+  }
+  
+  
   //////// Shape implementation
   
   
@@ -227,22 +242,10 @@ public class Polygon2D { // implements Shape {
   
   
   
-  /** 
-   * Returns the set of line segments representing this polygon in no particular order. 
-   */
-  public Set<Line2D> getSegments() {
-    Set<Line2D> result = new HashSet<>();
-    
-    for(int i = 0; i < x.length; i++) {
-      int next = GameMath.wrap(i+1, x);
-      result.add(new Line2D.Double(x[i], y[i], x[next], y[next]));
-    }
-    
-    return result;
-  }
+  //////// Intersections
   
   
-  /** Returns the set of points at which two polygons intersect. */
+  /** Returns the set of points at which two polygons intersect. This completes in O(N*logN) time. */
   public static Set<Point2D> getIntersections(Polygon2D p1, Polygon2D p2) {
     
     // Create the set of all the segments in the two polygons.
@@ -270,6 +273,46 @@ public class Polygon2D { // implements Shape {
   public Set<Point2D> getIntersections(Polygon2D other) {
     return getIntersections(this, other);
   }
+  
+  
+  
+  //////// Simple/Complex
+  
+  
+  /** 
+   * Returns true iff this is a simple polygon. That is, if none of its 
+   * segments intersect except at their endpoints. 
+   */
+  public boolean isSimple() {
+    return (getComplexPoints().size() == 0);
+  }
+  
+  /** Returns any points of self-intersection in this polygon that would make it complex.*/
+  public Set<Point2D> getComplexPoints() {
+    Set<Point2D> vertices = BentleyOttmannLineSweepAlgorithm.getIntersections(this.getSegments());
+    
+    Set<Point2D> result = new HashSet<>();
+    Set<Point2D> points = new HashSet<>(this.getPoints());
+    for(Point2D vertex : vertices) {
+      if(!points.contains(vertex)) {
+        result.add(vertex);
+      }
+    }
+    
+    return result;
+  }
+  
+  
+  /** Produces a simple version of a complex polygon*/
+/*  public Polygon2D toSimplePolygon() {
+    Set<Point2D> complexPoints = getComplexPoints();
+    
+    Set<Line2D> segs = getSegments();
+    Set<Line2D> newSegs = new HashSet<>();
+    for(Line2D segment : segs) {
+      
+    }
+  }*/
   
   
   //////// Transforming the polygon. 
