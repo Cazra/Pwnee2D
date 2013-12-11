@@ -157,6 +157,13 @@ public abstract class Sprite {
     return new Point2D.Double(focalX, focalY);
   }
   
+  /** Sets the focal point for the sprite. */
+  public void setFocalPoint(double x, double y) {
+    focalX = x;
+    focalY = y;
+  }
+  
+  
   /** 
    * Returns the dimensions of the sprite's bounding box.
    */
@@ -173,6 +180,23 @@ public abstract class Sprite {
   /** Returns the height of the sprite's bounding box. */
   public double getHeight() {
     return getCollisionBox().getHeight();
+  }
+  
+  
+  /** Sets the unscaled width of the sprite's collision box. */
+  public void setWidth(double width) {
+    this.width = width;
+  }
+  
+  /** Sets the unscaled height of the sprite's collision box. */
+  public void setHeight(double height) {
+    this.height = height;
+  }
+  
+  /** Sets the unscaled dimensions of the sprite's bounding box. */
+  public void setDimensions(double width, double height) {
+    this.width = width;
+    this.height = height;
   }
   
 	
