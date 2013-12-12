@@ -430,16 +430,55 @@ public abstract class Sprite {
    * may have slightly different properties, such as generic NPCs in an RPG.
    * The empty implementation here just returns 0.
    */
-  public double getProperty(int propertyCode) {
+  public double getNumericalProperty(int propertyCode) {
     return 0;
   }
   
   /** 
    * Sets the value for some numerical property of an anonymous instance. 
-   * See getProperty(int). 
+   * See getNumericalProperty(int). 
    * The default implementation is empty.
    */
-  public void setProperty(int propertyCode, double value) {
+  public void setNumericalProperty(int propertyCode, double value) {
+  }
+  
+  /** 
+   * This method can be overridden to provide access to numerical  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns 0.
+   */
+  public double getNumericalProperty(String propertyName) {
+    return 0;
+  }
+  
+  /** 
+   * Sets the value for some numerical property of an anonymous instance. 
+   * See getNumericalProperty(String). 
+   * The default implementation is empty.
+   */
+  public void setNumericalProperty(String propertyName, double value) {
+  }
+  
+  
+  /** 
+   * This method can be overridden to provide access to boolean  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns false.
+   */
+  public boolean getBooleanProperty(int propertyCode) {
+    return false;
+  }
+  
+  /** 
+   * Sets the value for some boolean property of an anonymous instance. 
+   * See getBooleanProperty(int). 
+   * The default implementation is empty.
+   */
+  public void setBooleanProperty(int propertyCode, boolean value) {
   }
   
   /** 
@@ -449,16 +488,55 @@ public abstract class Sprite {
    * may have slightly different properties, such as generic NPCs in an RPG.
    * The empty implementation here just returns false.
    */
-  public boolean getFlag(int flagCode) {
+  public boolean getBooleanProperty(String propertyName) {
     return false;
   }
   
   /** 
    * Sets the value for some boolean property of an anonymous instance. 
-   * See getFlag(int). 
+   * See getBooleanProperty(String). 
    * The default implementation is empty.
    */
-  public void setFlag(int flagCode, boolean value) {
+  public void setBooleanProperty(String propertyName, boolean value) {
+  }
+  
+  
+  /** 
+   * This method can be overridden to provide access to String  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns "".
+   */
+  public String getStringProperty(int propertyCode) {
+    return "";
+  }
+  
+  /** 
+   * Sets the value for some String property of an anonymous instance. 
+   * See getStringProperty(int). 
+   * The default implementation is empty.
+   */
+  public void setStringProperty(int propertyCode, String value) {
+  }
+  
+  /** 
+   * This method can be overridden to provide access to String  
+   * properties of an anonymous instance of some Sprite. 
+   * This is convenient for game objects that use the same Sprite class, but
+   * may have slightly different properties, such as generic NPCs in an RPG.
+   * The empty implementation here just returns "".
+   */
+  public String getStringProperty(String flagName) {
+    return "";
+  }
+  
+  /** 
+   * Sets the value for some String property of an anonymous instance. 
+   * See getStringProperty(String). 
+   * The default implementation is empty.
+   */
+  public void setStringProperty(String propertyName, String value) {
   }
 }
 
