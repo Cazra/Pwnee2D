@@ -135,17 +135,12 @@ public class TextSprite extends Sprite {
    */
   public String setPara(int index) {
     if(index >=0 && index < paragraphs.size()) {
-    //  text = paragraphs.get(index);
-    //  paraIndex = index;
       paraIndex = index;
       setText(paragraphs.get(index));
     }
     else {
       text = "Hello. I am ERROR.";
     }
-    
-    // lineWrap();
-    
     return text;
   }
   
@@ -156,16 +151,6 @@ public class TextSprite extends Sprite {
   public String nextPara() {
     paraIndex++;
     setPara(paraIndex);
-    
-  //  if(paraIndex >=0 && paraIndex < paragraphs.size()) {
-  //    text = paragraphs.get(paraIndex);
-  //  }
-  //  else {
-  //    text = "Hello. I am ERROR.";
-  //  }
-  //  
-  //  lineWrap();
-    
     return text;
   }
   
@@ -176,16 +161,13 @@ public class TextSprite extends Sprite {
   public String prevPara() {
     paraIndex--;
     setPara(paraIndex);
-    
-  //  if(paraIndex >= 0) {
-  //    text = paragraphs.get(paraIndex);
-  //  }
-  //  else {
-  //    text = "Hello. I am ERROR.";
-  //  }
-  //  
-  //  lineWrap();
-    
     return text;
+  }
+  
+  
+  /** Gets the Y offset of the top of a row of text in this TextSprite. */
+  public int getRowYOffset(int index) {
+    int rowHeight = bfont.charHeight + bfont.vPadding;
+    return rowHeight*index;
   }
 }
